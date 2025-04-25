@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "studio.fantasyit.maid_useful_task.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "maid_useful_task.refmap.json",
+  "mixins": [
+    "MaidRunOneMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
