@@ -10,13 +10,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import studio.fantasyit.maid_useful_task.memory.TaskRateLimitToken;
 import studio.fantasyit.maid_useful_task.task.IMaidBlockPlaceTask;
+import studio.fantasyit.maid_useful_task.util.Conditions;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlaceBlockMoveBehavior extends MaidMoveToBlockTask {
+public class PlaceBlockMoveBehavior extends MaidCenterMoveToBlockTask {
     private IMaidBlockPlaceTask task;
     private MaidPathFindingBFS pathfindingBFS;
     private BlockPos targetPos;
@@ -24,6 +26,15 @@ public class PlaceBlockMoveBehavior extends MaidMoveToBlockTask {
 
     public PlaceBlockMoveBehavior() {
         super(0.5f, 4);
+    }
+
+
+    @Override
+    protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid p_22539_) {
+        if (MemoryUtil.getRateLimitToken(p_22539_).isFor(TaskRateLimitToken.Level.L2)) {
+            return false;
+        }
+        return super.checkExtraStartConditions(p_22538_, p_22539_);
     }
 
     @Override
@@ -59,6 +70,7 @@ public class PlaceBlockMoveBehavior extends MaidMoveToBlockTask {
                 for (int dy : dv) {
                     for (int dz : dv) {
                         BlockPos pos = mb.offset(dx, dy, dz);
+                        if (!Conditions.isGlobalValidTarget(entityMaid, pos, targetPos)) continue;
                         if (entityMaid.isWithinRestriction(pos) && pathfindingBFS.canPathReach(pos)) {
                             mb.set(pos);
                             return true;
@@ -74,7 +86,14 @@ public class PlaceBlockMoveBehavior extends MaidMoveToBlockTask {
 
     @Override
     protected @NotNull MaidPathFindingBFS getOrCreateArrivalMap(@NotNull ServerLevel worldIn, @NotNull EntityMaid maid) {
-        this.pathfindingBFS = super.getOrCreateArrivalMap(worldIn, maid);
+        if (this.pathfindingBFS == null)
+            this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 10);
         return this.pathfindingBFS;
+    }
+
+    @Override
+    protected void clearCurrentArrivalMap(MaidPathFindingBFS pathFinding) {
+        super.clearCurrentArrivalMap(pathFinding);
+        this.pathfindingBFS = null;
     }
 }

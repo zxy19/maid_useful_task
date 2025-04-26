@@ -18,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.behavior.DestoryBlockBehavior;
 import studio.fantasyit.maid_useful_task.behavior.DestoryBlockMoveBehavior;
+import studio.fantasyit.maid_useful_task.util.MaidUtils;
 import studio.fantasyit.maid_useful_task.util.WrappedMaidFakePlayer;
 
 import java.util.*;
@@ -27,6 +28,9 @@ public interface IMaidBlockDestroyTask {
         List<BlockPos> list = new ArrayList<>();
         Vec3 eyePos = standPos.getCenter().add(0, maid.getEyeHeight() - 0.5, 0);
         Boolean available = BlockGetter.traverseBlocks(eyePos, targetPos.getCenter(), maid.level(), (level, pos) -> {
+            if (pos.distSqr(standPos) > reachDistance() * reachDistance()) {
+                return false;
+            }
             BlockState state = level.getBlockState(pos);
             if (state.isAir()) {
                 return null;
@@ -108,7 +112,8 @@ public interface IMaidBlockDestroyTask {
      * @return 是否可以破坏
      */
     default boolean canDestroyBlock(EntityMaid maid, BlockPos pos) {
-        if (maid.distanceToSqr(pos.getCenter()) > Math.pow(reachDistance(), 2)) {
+        //女仆可能少走一格，所以判断时给予补偿
+        if (maid.distanceToSqr(pos.getCenter()) > Math.pow(reachDistance() + 1, 2)) {
             return false;
         }
         return true;
@@ -117,32 +122,12 @@ public interface IMaidBlockDestroyTask {
     /**
      * 尝试破坏方块
      *
-     * @param maid 女仆
-     * @param blockPos  位置
+     * @param maid     女仆
+     * @param blockPos 位置
      * @return
      */
     default boolean tryDestroyBlock(EntityMaid maid, BlockPos blockPos) {
-        ServerLevel level = (ServerLevel) maid.level();
-        BlockState blockState = level.getBlockState(blockPos);
-        if (blockState.isAir()) {
-            return false;
-        } else {
-            FluidState fluidState = level.getFluidState(blockPos);
-            if (!(blockState.getBlock() instanceof BaseFireBlock)) {
-                level.levelEvent(2001, blockPos, Block.getId(blockState));
-            }
-
-            BlockEntity blockEntity = blockState.hasBlockEntity() ? level.getBlockEntity(blockPos) : null;
-            //改用MainHandItem来roll loot
-            maid.dropResourcesToMaidInv(blockState, level, blockPos, blockEntity, maid, maid.getMainHandItem());
-
-            boolean setResult = level.setBlock(blockPos, fluidState.createLegacyBlock(), 3);
-            if (setResult) {
-                level.gameEvent(GameEvent.BLOCK_DESTROY, blockPos, GameEvent.Context.of(maid, blockState));
-            }
-
-            return setResult;
-        }
+        return MaidUtils.destroyBlock(maid, blockPos);
     }
 
     /**
@@ -162,7 +147,7 @@ public interface IMaidBlockDestroyTask {
     }
 
     default int reachDistance() {
-        return 6;
+        return 7;
     }
 
     default @NotNull List<Pair<Integer, BehaviorControl<? super EntityMaid>>> createBrainTasks(@NotNull EntityMaid entityMaid) {

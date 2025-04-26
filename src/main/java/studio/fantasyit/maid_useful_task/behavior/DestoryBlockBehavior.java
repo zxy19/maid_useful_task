@@ -16,6 +16,7 @@ import studio.fantasyit.maid_useful_task.util.Conditions;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 import studio.fantasyit.maid_useful_task.util.WrappedMaidFakePlayer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,7 @@ public class DestoryBlockBehavior extends Behavior<EntityMaid> {
         super.start(p_22540_, maid, p_22542_);
         BlockTargetMemory blockTargetMemory = MemoryUtil.getDestroyTargetMemory(maid);
         if (blockTargetMemory != null) {
-            blockPosSet = blockTargetMemory.getBlockPosSet();
+            blockPosSet =new ArrayList<>(blockTargetMemory.getBlockPosSet());
             blockPosSet.sort((o1, o2) -> (int) (o1.distSqr(maid.blockPosition()) - o2.distSqr(maid.blockPosition())));
         }
         index = 0;

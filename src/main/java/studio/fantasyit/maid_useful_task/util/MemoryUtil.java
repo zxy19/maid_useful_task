@@ -3,11 +3,15 @@ package studio.fantasyit.maid_useful_task.util;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.init.InitEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.memory.BlockTargetMemory;
+import studio.fantasyit.maid_useful_task.memory.BlockUpContext;
+import studio.fantasyit.maid_useful_task.memory.TaskRateLimitToken;
 import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
 
 import java.util.List;
@@ -50,4 +54,20 @@ public class MemoryUtil {
     public static void setLookAt(EntityMaid maid, BlockPos pos) {
         maid.getBrain().setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(pos));
     }
+
+    public static BlockUpContext getBlockUpContext(EntityMaid maid){
+        Brain<EntityMaid> brain = maid.getBrain();
+        if(!brain.hasMemoryValue(MemoryModuleRegistry.BLOCK_UP_TARGET.get())){
+            brain.setMemory(MemoryModuleRegistry.BLOCK_UP_TARGET.get(), new BlockUpContext());
+        }
+        return brain.getMemory(MemoryModuleRegistry.BLOCK_UP_TARGET.get()).get();
+    }
+    public static TaskRateLimitToken getRateLimitToken(EntityMaid maid){
+        Brain<EntityMaid> brain = maid.getBrain();
+        if(!brain.hasMemoryValue(MemoryModuleRegistry.RATE_LIMIT_TOKEN.get())){
+            brain.setMemory(MemoryModuleRegistry.RATE_LIMIT_TOKEN.get(), new TaskRateLimitToken());
+        }
+        return brain.getMemory(MemoryModuleRegistry.RATE_LIMIT_TOKEN.get()).get();
+    }
+
 }

@@ -49,7 +49,7 @@ public class PlaceBlockBehavior extends Behavior<EntityMaid> {
         IMaidBlockPlaceTask task = (IMaidBlockPlaceTask) maid.getTask();
         if (task.shouldPlacePos(maid, maid.getMainHandItem(), target)) {
             maid.swing(InteractionHand.MAIN_HAND);
-            task.tryPlaceBlock(maid, maid.getMainHandItem(), target);
+            task.tryPlaceBlock(maid, target);
         }
         target = null;
     }

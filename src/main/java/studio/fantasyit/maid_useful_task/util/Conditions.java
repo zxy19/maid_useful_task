@@ -2,17 +2,20 @@ package studio.fantasyit.maid_useful_task.util;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.init.InitEntities;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.phys.Vec3;
+import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
 
 import java.util.Optional;
 
 public class Conditions {
-    public static boolean hasReachedValidTargetOrReset(EntityMaid maid){
+    public static boolean hasReachedValidTargetOrReset(EntityMaid maid) {
         return hasReachedValidTargetOrReset(maid, 2);
     }
+
     public static boolean hasReachedValidTargetOrReset(EntityMaid maid, float closeEnough) {
         Brain<EntityMaid> brain = maid.getBrain();
         return brain.getMemory(InitEntities.TARGET_POS.get()).map(targetPos -> {
@@ -34,5 +37,14 @@ public class Conditions {
             return false;
         }
         return maid.getDeltaMovement().length() < 0.2;
+    }
+
+    public static boolean isGlobalValidTarget(EntityMaid maid, BlockPos pos, BlockPos targetPos) {
+        if (MemoryUtil.getBlockUpContext(maid).hasTarget()) {
+            if (targetPos.getY() < maid.getBlockY() && targetPos.getX() == maid.getBlockX() && targetPos.getZ() == maid.getBlockZ())
+                return false;
+            return MemoryUtil.getBlockUpContext(maid).isTarget(pos);
+        }
+        return true;
     }
 }

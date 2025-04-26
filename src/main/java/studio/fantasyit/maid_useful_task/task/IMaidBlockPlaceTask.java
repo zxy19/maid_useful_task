@@ -14,6 +14,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.NotNull;
 import studio.fantasyit.maid_useful_task.behavior.DestoryBlockBehavior;
 import studio.fantasyit.maid_useful_task.behavior.DestoryBlockMoveBehavior;
+import studio.fantasyit.maid_useful_task.util.MaidUtils;
 import studio.fantasyit.maid_useful_task.util.WrappedMaidFakePlayer;
 
 import java.util.List;
@@ -23,24 +24,8 @@ public interface IMaidBlockPlaceTask {
 
     boolean shouldPlacePos(EntityMaid maid, ItemStack itemStack, BlockPos pos);
 
-    default boolean tryPlaceBlock(EntityMaid maid, ItemStack itemStack, BlockPos pos){
-        Player fakePlayer = WrappedMaidFakePlayer.get(maid);
-        BlockHitResult result = null;
-        ClipContext rayTraceContext = new ClipContext(maid.getPosition(0).add(0, maid.getEyeHeight(), 0),
-                pos.getCenter(),
-                ClipContext.Block.OUTLINE,
-                ClipContext.Fluid.NONE,
-                fakePlayer);
-        result = maid.level().clip(rayTraceContext);
-        UseOnContext useContext = new UseOnContext(fakePlayer, InteractionHand.MAIN_HAND, result);
-        InteractionResult actionresult = fakePlayer.getItemInHand(InteractionHand.MAIN_HAND).onItemUseFirst(useContext);
-        if (actionresult == InteractionResult.PASS) {
-            InteractionResult interactionResult = fakePlayer.getItemInHand(InteractionHand.MAIN_HAND).useOn(useContext);
-            if (interactionResult.consumesAction()) {
-                return true;
-            }
-        }
-        return false;
+    default boolean tryPlaceBlock(EntityMaid maid, BlockPos pos){
+        return MaidUtils.placeBlock(maid,pos);
     }
     default @NotNull List<Pair<Integer, BehaviorControl<? super EntityMaid>>> createBrainTasks(@NotNull EntityMaid entityMaid) {
         return List.of(

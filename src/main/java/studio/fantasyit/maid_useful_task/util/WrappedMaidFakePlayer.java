@@ -34,12 +34,17 @@ public class WrappedMaidFakePlayer extends FakePlayer {
 
     public static WrappedMaidFakePlayer get(EntityMaid maid) {
         if (cache.containsKey(maid.getUUID())) {
-            return cache.get(maid.getUUID());
-        } else {
-            WrappedMaidFakePlayer fakePlayer = new WrappedMaidFakePlayer(maid);
-            cache.put(maid.getUUID(), fakePlayer);
-            return fakePlayer;
+            WrappedMaidFakePlayer wrappedMaidFakePlayer = cache.get(maid.getUUID());
+            if (!wrappedMaidFakePlayer.maid.isAlive()) {
+                cache.remove(maid.getUUID());
+            } else {
+                return wrappedMaidFakePlayer;
+            }
         }
+        WrappedMaidFakePlayer fakePlayer = new WrappedMaidFakePlayer(maid);
+        cache.put(maid.getUUID(), fakePlayer);
+        return fakePlayer;
+
     }
 
     private WrappedMaidFakePlayer(EntityMaid maid) {
@@ -49,27 +54,32 @@ public class WrappedMaidFakePlayer extends FakePlayer {
 
     @Override
     public boolean removeEffect(MobEffect p_21196_) {
+        if (maid == null) return false;
         return maid.removeEffect(p_21196_);
     }
 
     @Nullable
     @Override
     public MobEffectInstance removeEffectNoUpdate(@Nullable MobEffect p_21164_) {
+        if (maid == null) return super.removeEffectNoUpdate(p_21164_);
         return maid.removeEffectNoUpdate(p_21164_);
     }
 
     @Override
     public boolean removeAllEffects() {
+        if (maid == null) return false;
         return maid.removeAllEffects();
     }
 
     @Override
     public boolean addEffect(MobEffectInstance p_147208_, @Nullable Entity p_147209_) {
+        if (maid == null) return super.addEffect(p_147208_, p_147209_);
         return maid.addEffect(p_147208_, p_147209_);
     }
 
     @Override
     public boolean canBeAffected(MobEffectInstance p_21197_) {
+        if (maid == null) return super.canBeAffected(p_21197_);
         return maid.canBeAffected(p_21197_);
     }
 
@@ -81,21 +91,25 @@ public class WrappedMaidFakePlayer extends FakePlayer {
     @Nullable
     @Override
     public MobEffectInstance getEffect(MobEffect p_21125_) {
+        if (maid == null) return super.getEffect(p_21125_);
         return maid.getEffect(p_21125_);
     }
 
     @Override
     public Collection<MobEffectInstance> getActiveEffects() {
+        if (maid == null) return super.getActiveEffects();
         return maid.getActiveEffects();
     }
 
     @Override
     public Map<MobEffect, MobEffectInstance> getActiveEffectsMap() {
+        if (maid == null) return super.getActiveEffectsMap();
         return maid.getActiveEffectsMap();
     }
 
     @Override
     public boolean hasEffect(MobEffect p_21024_) {
+        if (maid == null) return super.hasEffect(p_21024_);
         return maid.hasEffect(p_21024_);
     }
 
@@ -106,12 +120,20 @@ public class WrappedMaidFakePlayer extends FakePlayer {
     }
 
     @Override
+    public ItemStack getItemInHand(InteractionHand p_21121_) {
+        if (maid == null) return super.getItemInHand(p_21121_);
+        return maid.getItemInHand(p_21121_);
+    }
+
+    @Override
     public void setItemInHand(InteractionHand p_21009_, ItemStack p_21010_) {
+        if (maid == null) return;
         maid.setItemInHand(p_21009_, p_21010_);
     }
 
     @Override
     public void setItemSlot(EquipmentSlot p_36161_, ItemStack p_36162_) {
+        if (maid == null) return;
         maid.setItemSlot(p_36161_, p_36162_);
     }
 
@@ -123,11 +145,13 @@ public class WrappedMaidFakePlayer extends FakePlayer {
 
     @Override
     public boolean isEyeInFluid(TagKey<Fluid> p_204030_) {
+        if (maid == null) return false;
         return maid.isEyeInFluid(p_204030_);
     }
 
     @Override
     public boolean onGround() {
+        if (maid == null) return false;
         return maid.onGround();
     }
 
@@ -169,6 +193,7 @@ public class WrappedMaidFakePlayer extends FakePlayer {
 
     @Override
     public void teleportRelative(double p_251611_, double p_248861_, double p_252266_) {
+        if (maid == null) return;
         maid.teleportRelative(p_251611_, p_248861_, p_252266_);
     }
 
@@ -180,6 +205,7 @@ public class WrappedMaidFakePlayer extends FakePlayer {
 
     @Override
     public ChunkPos chunkPosition() {
+        if (maid == null) return new ChunkPos(0, 0);
         return maid.chunkPosition();
     }
 }

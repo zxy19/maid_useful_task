@@ -26,7 +26,9 @@ public class UsefulTaskExtension implements ILittleMaid {
             public List<MemoryModuleType<?>> getExtraMemoryTypes() {
                 return List.of(
                         MemoryModuleRegistry.DESTROY_TARGET.get(),
-                        MemoryModuleRegistry.PLACE_TARGET.get()
+                        MemoryModuleRegistry.PLACE_TARGET.get(),
+                        MemoryModuleRegistry.BLOCK_UP_TARGET.get(),
+                        MemoryModuleRegistry.RATE_LIMIT_TOKEN.get()
                 );
             }
         });

@@ -19,16 +19,13 @@ import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
-import studio.fantasyit.maid_useful_task.behavior.DestoryBlockBehavior;
-import studio.fantasyit.maid_useful_task.behavior.DestoryBlockMoveBehavior;
-import studio.fantasyit.maid_useful_task.behavior.PlaceBlockBehavior;
-import studio.fantasyit.maid_useful_task.behavior.PlaceBlockMoveBehavior;
+import studio.fantasyit.maid_useful_task.behavior.*;
 import studio.fantasyit.maid_useful_task.util.WrappedMaidFakePlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockDestroyTask {
+public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockDestroyTask, IMaidBlockUpTask {
     @Override
     public ResourceLocation getUid() {
         return new ResourceLocation(MaidUsefulTask.MODID, "maid_tree");
@@ -73,7 +70,7 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
     @Override
     public boolean shouldPlacePos(EntityMaid maid, ItemStack itemStack, BlockPos pos) {
         ServerLevel level = (ServerLevel) maid.level();
-        if(!level.getBlockState(pos.below()).is(BlockTags.DIRT)) return false;
+        if (!level.getBlockState(pos.below()).is(BlockTags.DIRT)) return false;
         if (!level.getBlockState(pos).canBeReplaced()) return false;
         final int[] dv = {0, 1, -1, 2, -2};
         for (int dx : dv) {
@@ -154,12 +151,34 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
     @Override
     public List<Pair<Integer, BehaviorControl<? super EntityMaid>>> createBrainTasks(EntityMaid entityMaid) {
         ArrayList<Pair<Integer, BehaviorControl<? super EntityMaid>>> list = new ArrayList<>();
+        list.add(Pair.of(6, new LoopWithTokenBehavior()));
 
         list.add(Pair.of(5, new DestoryBlockBehavior()));
         list.add(Pair.of(4, new DestoryBlockMoveBehavior()));
         list.add(Pair.of(3, new PlaceBlockBehavior()));
         list.add(Pair.of(2, new PlaceBlockMoveBehavior()));
 
+        list.add(Pair.of(1, new BlockUpScheduleBehavior()));
+        list.add(Pair.of(0, new BlockUpPlaceBehavior()));
+        list.add(Pair.of(0, new BlockUpDestroyBehavior()));
+
         return list;
+    }
+
+    @Override
+    public boolean isValidItemStack(EntityMaid maid, ItemStack stack) {
+        return stack.is(ItemTags.LOGS);
+    }
+
+    @Override
+    public boolean isDestroyTool(EntityMaid maid, ItemStack stack) {
+        return stack.is(ItemTags.AXES);
+    }
+
+    @Override
+    public boolean isFindingBlock(EntityMaid maid, BlockPos target, BlockPos standPos) {
+        if (target.distSqr(standPos) > touchLimit() * touchLimit())
+            return false;
+        return maid.level().getBlockState(target).is(BlockTags.LOGS) && isValidNatureTree(maid, target);
     }
 }

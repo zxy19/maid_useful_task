@@ -11,9 +11,9 @@ import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
 @Mixin(MaidRunOne.class)
 abstract public class MaidRunOneMixin {
-    @Inject(method = "tryStart(Lnet/minecraft/server/level/ServerLevel;Lcom/github/tartaricacid/touhoulittlemaid/entity/passive/EntityMaid;J)Z", at = @At("HEAD"), cancellable = true,remap = false)
+    @Inject(method = "tryStart(Lnet/minecraft/server/level/ServerLevel;Lcom/github/tartaricacid/touhoulittlemaid/entity/passive/EntityMaid;J)Z", at = @At("HEAD"), cancellable = true, remap = false)
     public void runOne(ServerLevel pLevel, EntityMaid maid, long pGameTime, CallbackInfoReturnable<Boolean> cir) {
-        if (MemoryUtil.getDestroyTargetMemory(maid) != null || MemoryUtil.getPlaceTarget(maid) != null)
+        if (MemoryUtil.getDestroyTargetMemory(maid) != null || MemoryUtil.getPlaceTarget(maid) != null || MemoryUtil.getBlockUpContext(maid).hasTarget())
             cir.setReturnValue(false);
     }
 }

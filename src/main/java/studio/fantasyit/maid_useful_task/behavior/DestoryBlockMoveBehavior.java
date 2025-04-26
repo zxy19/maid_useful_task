@@ -7,19 +7,30 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import studio.fantasyit.maid_useful_task.memory.TaskRateLimitToken;
 import studio.fantasyit.maid_useful_task.task.IMaidBlockDestroyTask;
+import studio.fantasyit.maid_useful_task.util.Conditions;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
 import java.util.List;
 
-public class DestoryBlockMoveBehavior extends MaidMoveToBlockTask {
+public class DestoryBlockMoveBehavior extends MaidCenterMoveToBlockTask {
     private IMaidBlockDestroyTask task;
     private MaidPathFindingBFS pathfindingBFS;
     private BlockPos targetPos;
     List<BlockPos> blockPosSet;
 
     public DestoryBlockMoveBehavior() {
-        super(0.5f, 4);
+        super(0.5f, 7, 8);
+    }
+
+
+    @Override
+    protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid p_22539_) {
+        if (MemoryUtil.getRateLimitToken(p_22539_).isFor(TaskRateLimitToken.Level.L1)) {
+            return false;
+        }
+        return super.checkExtraStartConditions(p_22538_, p_22539_);
     }
 
     @Override
@@ -34,7 +45,6 @@ public class DestoryBlockMoveBehavior extends MaidMoveToBlockTask {
             MemoryUtil.setDestroyTargetMemory(maid, blockPosSet);
         }
     }
-
     @Override
     protected boolean shouldMoveTo(@NotNull ServerLevel serverLevel, @NotNull EntityMaid entityMaid, @NotNull BlockPos blockPos) {
         if (!task.shouldDestroyBlock(entityMaid, blockPos)) return false;
@@ -44,6 +54,8 @@ public class DestoryBlockMoveBehavior extends MaidMoveToBlockTask {
                 for (int dy = 0; dy < task.reachDistance(); dy = dy <= 0 ? 1 - dy : -dy) {
                     for (int dz = 0; dz < task.reachDistance(); dz = dz <= 0 ? 1 - dz : -dz) {
                         BlockPos pos = mb.offset(dx, dy, dz);
+                        if (!Conditions.isGlobalValidTarget(entityMaid, pos, targetPos)) continue;
+                        if (pos.distSqr(targetPos) > task.reachDistance() * task.reachDistance()) continue;
                         if (entityMaid.isWithinRestriction(pos) && pathfindingBFS.canPathReach(pos)) {
                             blockPosSet = task.toDestroyFromStanding(entityMaid, targetPos, pos);
                             if (blockPosSet != null) {
@@ -59,9 +71,17 @@ public class DestoryBlockMoveBehavior extends MaidMoveToBlockTask {
         return false;
     }
 
+
     @Override
     protected @NotNull MaidPathFindingBFS getOrCreateArrivalMap(@NotNull ServerLevel worldIn, @NotNull EntityMaid maid) {
-        this.pathfindingBFS = super.getOrCreateArrivalMap(worldIn, maid);
+        if (this.pathfindingBFS == null)
+            this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 14);
         return this.pathfindingBFS;
+    }
+
+    @Override
+    protected void clearCurrentArrivalMap(MaidPathFindingBFS pathFinding) {
+        super.clearCurrentArrivalMap(pathFinding);
+        this.pathfindingBFS = null;
     }
 }
