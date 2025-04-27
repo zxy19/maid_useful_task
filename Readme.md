@@ -1,0 +1,19 @@
+# Maid Useful Tasks
+
+如果需要中文，请访问 [中文版](Readme_zh.md)
+
+An extension mod of TLM(Touhou Little Maid). Add some useful tasks to your Maid.
+
+> Currently, it's logging only.
+
+# Features
+
+## Logging
+
+The maid will cut down the logs around her and plant saplings. You can give the maid an axe and hoe or scissors to speed
+up the maid's ability to cut down trees and destroy leaves!
+
+# More
+
++ The Mod is currently in early development. Everything may change in the future.
++ Some content maybe move to the TLM Mod in the future.
