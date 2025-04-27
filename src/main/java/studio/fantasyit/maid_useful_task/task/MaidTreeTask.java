@@ -117,7 +117,7 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
         CombinedInvWrapper inv = maid.getAvailableInv(true);
         int target = -1;
         for (int i = 0; i < inv.getSlots(); i++) {
-            if (inv.getStackInSlot(i).is(Items.SHEARS)) {
+            if (inv.getStackInSlot(i).is(Items.SHEARS) || inv.getStackInSlot(i).is(ItemTags.HOES)) {
                 target = i;
                 break;
             }
