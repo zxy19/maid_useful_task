@@ -28,7 +28,8 @@ public class UsefulTaskExtension implements ILittleMaid {
                         MemoryModuleRegistry.DESTROY_TARGET.get(),
                         MemoryModuleRegistry.PLACE_TARGET.get(),
                         MemoryModuleRegistry.BLOCK_UP_TARGET.get(),
-                        MemoryModuleRegistry.RATE_LIMIT_TOKEN.get()
+                        MemoryModuleRegistry.BLOCK_VALIDATION.get(),
+                        MemoryModuleRegistry.CURRENT_WORK.get()
                 );
             }
         });

@@ -1,6 +1,5 @@
 package studio.fantasyit.maid_useful_task.behavior;
 
-import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.task.MaidCheckRateTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.init.InitEntities;
 import com.google.common.collect.ImmutableMap;
@@ -13,11 +12,10 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import oshi.util.tuples.Pair;
 import studio.fantasyit.maid_useful_task.memory.BlockUpContext;
-import studio.fantasyit.maid_useful_task.memory.TaskRateLimitToken;
+import studio.fantasyit.maid_useful_task.memory.CurrentWork;
 import studio.fantasyit.maid_useful_task.task.IMaidBlockUpTask;
+import studio.fantasyit.maid_useful_task.util.MaidUtils;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
-
-import java.util.Map;
 
 public class BlockUpScheduleBehavior extends Behavior<EntityMaid> {
     public BlockUpScheduleBehavior() {
@@ -26,7 +24,10 @@ public class BlockUpScheduleBehavior extends Behavior<EntityMaid> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid p_22539_) {
-        if (MemoryUtil.getRateLimitToken(p_22539_).isFor(TaskRateLimitToken.Level.L3)) {
+        if (!switch (MemoryUtil.getCurrent(p_22539_)) {
+            case BLOCKUP_UP, BLOCKUP_DOWN, BLOCKUP_DESTROY, IDLE -> true;
+            default -> false;
+        }) {
             return false;
         }
         return super.checkExtraStartConditions(p_22538_, p_22539_);
@@ -37,23 +38,33 @@ public class BlockUpScheduleBehavior extends Behavior<EntityMaid> {
         BlockUpContext context = MemoryUtil.getBlockUpContext(maid);
         IMaidBlockUpTask task = (IMaidBlockUpTask) maid.getTask();
         if (context.hasTarget()) {
-            if (context.getStatus() != BlockUpContext.STATUS.IDLE && MemoryUtil.getTargetPos(maid) == null) {
+            if (context.getStatus() != BlockUpContext.STATUS.UP && !context.isOnLine(maid.blockPosition())) {
                 context.clearStartTarget();
+                MemoryUtil.setCurrent(maid, CurrentWork.IDLE);
+            } else if (context.getStatus() != BlockUpContext.STATUS.IDLE && MemoryUtil.getTargetPos(maid) == null) {
+                if (context.getStatus() == BlockUpContext.STATUS.DOWN) {
+                    MemoryUtil.setTarget(maid, context.getTargetPos(), 0.5f);
+                    MemoryUtil.setCurrent(maid, CurrentWork.BLOCKUP_DOWN);
+                } else {
+                    MemoryUtil.setTarget(maid, context.getStartPos(), 0.5f);
+                    MemoryUtil.setCurrent(maid, CurrentWork.BLOCKUP_UP);
+                }
             } else if (!context.isOnLine(maid.blockPosition()) || context.getStartPos().equals(context.getTargetPos())) {
                 context.clearStartTarget();
-            } else if (context.getStatus() == BlockUpContext.STATUS.IDLE && !context.isTarget(maid.blockPosition()) && context.isOnLine(maid.blockPosition())) {
-                context.setStartTarget(context.getStartPos(), maid.blockPosition());
+                MemoryUtil.setCurrent(maid, CurrentWork.IDLE);
             } else if (context.getStatus() == BlockUpContext.STATUS.IDLE && !task.stillValid(maid, maid.blockPosition())) {
                 maid.getBrain().setMemory(InitEntities.TARGET_POS.get(), new BlockPosTracker(context.getTargetPos()));
                 context.setStatus(BlockUpContext.STATUS.DOWN);
+                MemoryUtil.setCurrent(maid, CurrentWork.BLOCKUP_DOWN);
             }
         } else {
-            Pair<BlockPos, BlockPos> targetPosBlockUp = task.findTargetPosBlockUp(maid, maid.blockPosition());
+            Pair<BlockPos, BlockPos> targetPosBlockUp = task.findTargetPosBlockUp(maid, MaidUtils.getMaidRestrictCenter(maid), task.countMaxUsableBlockItems(maid));
             if (targetPosBlockUp != null) {
                 context.setStartTarget(targetPosBlockUp.getA(), targetPosBlockUp.getB());
                 maid.getBrain().setMemory(InitEntities.TARGET_POS.get(), new BlockPosTracker(targetPosBlockUp.getA()));
                 BehaviorUtils.setWalkAndLookTargetMemories(maid, targetPosBlockUp.getA(), 0.5f, 0);
                 context.setStatus(BlockUpContext.STATUS.UP);
+                MemoryUtil.setCurrent(maid, CurrentWork.BLOCKUP_UP);
             }
         }
     }

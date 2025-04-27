@@ -1,6 +1,5 @@
 package studio.fantasyit.maid_useful_task.behavior;
 
-import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.task.MaidMoveToBlockTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.MaidPathFindingBFS;
 import net.minecraft.core.BlockPos;
@@ -10,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import studio.fantasyit.maid_useful_task.memory.TaskRateLimitToken;
+import studio.fantasyit.maid_useful_task.memory.CurrentWork;
 import studio.fantasyit.maid_useful_task.task.IMaidBlockPlaceTask;
 import studio.fantasyit.maid_useful_task.util.Conditions;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
@@ -30,16 +29,16 @@ public class PlaceBlockMoveBehavior extends MaidCenterMoveToBlockTask {
 
 
     @Override
-    protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid p_22539_) {
-        if (MemoryUtil.getRateLimitToken(p_22539_).isFor(TaskRateLimitToken.Level.L2)) {
-            return false;
-        }
-        return super.checkExtraStartConditions(p_22538_, p_22539_);
+    protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid maid) {
+        if (!Conditions.isCurrent(maid, CurrentWork.IDLE)) return false;
+        return super.checkExtraStartConditions(p_22538_, maid);
     }
 
     @Override
     protected void start(ServerLevel p_22540_, EntityMaid maid, long p_22542_) {
         super.start(p_22540_, maid, p_22542_);
+        if (maid.hasRestriction())
+            this.setSearchRange((int) maid.getRestrictRadius());
         task = (IMaidBlockPlaceTask) maid.getTask();
         CombinedInvWrapper inv = maid.getAvailableInv(true);
         List<ItemStack> markedVis = new ArrayList<>();
@@ -52,6 +51,7 @@ public class PlaceBlockMoveBehavior extends MaidCenterMoveToBlockTask {
             @Nullable BlockPos target = MemoryUtil.getTargetPos(maid);
             if (target != null) {
                 MemoryUtil.setPlaceTarget(maid, targetPos);
+                MemoryUtil.setCurrent(maid, CurrentWork.PLACE);
                 inv.setStackInSlot(finalI, maid.getMainHandItem());
                 maid.setItemInHand(InteractionHand.MAIN_HAND, targetItem);
                 return;
@@ -62,7 +62,8 @@ public class PlaceBlockMoveBehavior extends MaidCenterMoveToBlockTask {
 
     @Override
     protected boolean shouldMoveTo(ServerLevel serverLevel, EntityMaid entityMaid, BlockPos blockPos) {
-        if (!task.shouldPlacePos(entityMaid, targetItem, blockPos)) return false;
+        if (!task.shouldPlacePos(entityMaid, targetItem, blockPos.immutable())) return false;
+        if (!entityMaid.isWithinRestriction(blockPos)) return false;
         targetPos = blockPos.immutable();
         if (blockPos instanceof BlockPos.MutableBlockPos mb) {
             final int[] dv = {0, 1, -1};
@@ -87,7 +88,10 @@ public class PlaceBlockMoveBehavior extends MaidCenterMoveToBlockTask {
     @Override
     protected @NotNull MaidPathFindingBFS getOrCreateArrivalMap(@NotNull ServerLevel worldIn, @NotNull EntityMaid maid) {
         if (this.pathfindingBFS == null)
-            this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 10);
+            if (maid.hasRestriction())
+                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 14, (int) maid.getRestrictRadius());
+            else
+                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 14);
         return this.pathfindingBFS;
     }
 

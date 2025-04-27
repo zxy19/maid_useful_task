@@ -37,7 +37,27 @@ public class MaidUtils {
             }
         }
     }
-    public static boolean destroyBlock(EntityMaid maid, BlockPos blockPos){
+
+    public static float getDestroyProgressDelta(EntityMaid maid, BlockPos blockPos) {
+        WrappedMaidFakePlayer fakePlayer = WrappedMaidFakePlayer.get(maid);
+        BlockState blockState = maid.level().getBlockState(blockPos);
+        return blockState.getDestroyProgress(fakePlayer, maid.level(), blockPos);
+    }
+
+    public static BlockPos getMaidRestrictCenter(EntityMaid maid) {
+        if (MemoryUtil.getBlockUpContext(maid).hasTarget()) {
+            return MemoryUtil.getBlockUpContext(maid).getTargetPos();
+        }
+        if (maid.hasRestriction())
+            return maid.getRestrictCenter();
+        return maid.blockPosition();
+    }
+
+    public static boolean destroyBlock(EntityMaid maid, BlockPos blockPos) {
+        WrappedMaidFakePlayer fakePlayer = WrappedMaidFakePlayer.get(maid);
+        maid.getMainHandItem().hurtAndBreak(1, fakePlayer, (p_186374_) -> {
+            p_186374_.broadcastBreakEvent(InteractionHand.MAIN_HAND);
+        });
         ServerLevel level = (ServerLevel) maid.level();
         BlockState blockState = level.getBlockState(blockPos);
         if (blockState.isAir()) {
@@ -62,7 +82,7 @@ public class MaidUtils {
     }
 
     public static boolean placeBlock(EntityMaid maid, BlockPos pos) {
-        Player fakePlayer = WrappedMaidFakePlayer.get(maid);
+        WrappedMaidFakePlayer fakePlayer = WrappedMaidFakePlayer.get(maid);
         BlockHitResult result = null;
         ClipContext rayTraceContext = new ClipContext(maid.getPosition(0).add(0, maid.getEyeHeight(), 0),
                 pos.getCenter(),

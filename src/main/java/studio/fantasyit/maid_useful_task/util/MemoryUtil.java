@@ -5,13 +5,12 @@ import com.github.tartaricacid.touhoulittlemaid.init.InitEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import org.jetbrains.annotations.Nullable;
-import studio.fantasyit.maid_useful_task.memory.BlockTargetMemory;
-import studio.fantasyit.maid_useful_task.memory.BlockUpContext;
-import studio.fantasyit.maid_useful_task.memory.TaskRateLimitToken;
+import studio.fantasyit.maid_useful_task.memory.*;
 import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
 
 import java.util.List;
@@ -62,12 +61,23 @@ public class MemoryUtil {
         }
         return brain.getMemory(MemoryModuleRegistry.BLOCK_UP_TARGET.get()).get();
     }
-    public static TaskRateLimitToken getRateLimitToken(EntityMaid maid){
+    public static BlockValidationMemory getBlockValidationMemory(EntityMaid maid){
         Brain<EntityMaid> brain = maid.getBrain();
-        if(!brain.hasMemoryValue(MemoryModuleRegistry.RATE_LIMIT_TOKEN.get())){
-            brain.setMemory(MemoryModuleRegistry.RATE_LIMIT_TOKEN.get(), new TaskRateLimitToken());
+        if(!brain.hasMemoryValue(MemoryModuleRegistry.BLOCK_VALIDATION.get())){
+            brain.setMemory(MemoryModuleRegistry.BLOCK_VALIDATION.get(), new BlockValidationMemory());
         }
-        return brain.getMemory(MemoryModuleRegistry.RATE_LIMIT_TOKEN.get()).get();
+        return brain.getMemory(MemoryModuleRegistry.BLOCK_VALIDATION.get()).get();
     }
 
+    public static void setTarget(EntityMaid maid, BlockPos targetPos,float speed) {
+        maid.getBrain().setMemory(InitEntities.TARGET_POS.get(), new BlockPosTracker(targetPos));
+        BehaviorUtils.setWalkAndLookTargetMemories(maid, targetPos, speed, 0);
+    }
+
+    public static CurrentWork getCurrent(EntityMaid maid){
+        return maid.getBrain().getMemory(MemoryModuleRegistry.CURRENT_WORK.get()).orElse(CurrentWork.IDLE);
+    }
+    public static void setCurrent(EntityMaid maid, CurrentWork currentWork){
+        maid.getBrain().setMemory(MemoryModuleRegistry.CURRENT_WORK.get(), currentWork);
+    }
 }

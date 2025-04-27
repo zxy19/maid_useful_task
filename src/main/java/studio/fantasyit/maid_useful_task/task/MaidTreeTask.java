@@ -20,10 +20,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.behavior.*;
+import studio.fantasyit.maid_useful_task.memory.BlockValidationMemory;
+import studio.fantasyit.maid_useful_task.util.MaidUtils;
+import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 import studio.fantasyit.maid_useful_task.util.WrappedMaidFakePlayer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockDestroyTask, IMaidBlockUpTask {
     @Override
@@ -49,12 +54,22 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
 
     @Override
     public boolean shouldDestroyBlock(EntityMaid maid, BlockPos pos) {
+        if (MemoryUtil.getBlockUpContext(maid).hasTarget()) {
+            if (pos.getY() < maid.getBlockY() && pos.getX() == maid.getBlockX() && pos.getZ() == maid.getBlockZ()) {
+                return false;
+            }
+        }
         BlockState blockState = maid.level().getBlockState(pos);
         return blockState.is(BlockTags.LOGS) && isValidNatureTree(maid, pos);
     }
 
     @Override
     public boolean mayDestroy(EntityMaid maid, BlockPos pos) {
+        if (MemoryUtil.getBlockUpContext(maid).hasTarget()) {
+            if (pos.getY() < maid.getBlockY() && pos.getX() == maid.getBlockX() && pos.getZ() == maid.getBlockZ()) {
+                return false;
+            }
+        }
         BlockState blockState = maid.level().getBlockState(pos);
         if (blockState.is(BlockTags.LEAVES)) {
             return true;
@@ -133,34 +148,56 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
         return IMaidBlockDestroyTask.super.availableToGetDrop(maid, fakePlayer, pos, targetBlockState);
     }
 
+
     protected boolean isValidNatureTree(EntityMaid maid, BlockPos startPos) {
+        return isValidNatureTree(maid, startPos, new HashSet<>());
+    }
+
+    protected boolean isValidNatureTree(EntityMaid maid, BlockPos startPos, Set<BlockPos> visited) {
+        BlockValidationMemory validationMemory = MemoryUtil.getBlockValidationMemory(maid);
+        if (validationMemory.hasRecord(startPos))
+            return validationMemory.isValid(startPos, false);
+        if (visited.contains(startPos))
+            return false;
+        visited.add(startPos);
+        boolean valid = false;
         final int[] dv = {0, 1, -1};
         for (int dx : dv) {
             for (int dz : dv) {
-                for (int dy = 0; dy < 6; dy++) {
-                    BlockState blockState = maid.level().getBlockState(startPos.offset(dx, dy, dz));
+                for (int dy : dv) {
+                    BlockPos offset = startPos.offset(dx, dy, dz);
+                    BlockState blockState = maid.level().getBlockState(offset);
                     if (blockState.is(BlockTags.LEAVES) && !blockState.getValue(LeavesBlock.PERSISTENT)) {
-                        return true;
+                        valid = true;
+                    }
+                    if (blockState.is(BlockTags.LOGS) && isValidNatureTree(maid, offset, visited)) {
+                        valid = true;
                     }
                 }
             }
         }
-        return false;
+        if (valid)
+            validationMemory.setValid(startPos);
+        else
+            validationMemory.setInvalid(startPos);
+        return valid;
     }
 
     @Override
     public List<Pair<Integer, BehaviorControl<? super EntityMaid>>> createBrainTasks(EntityMaid entityMaid) {
         ArrayList<Pair<Integer, BehaviorControl<? super EntityMaid>>> list = new ArrayList<>();
-        list.add(Pair.of(6, new LoopWithTokenBehavior()));
 
-        list.add(Pair.of(5, new DestoryBlockBehavior()));
-        list.add(Pair.of(4, new DestoryBlockMoveBehavior()));
+        list.add(Pair.of(1, new DestoryBlockBehavior()));
+        list.add(Pair.of(1, new DestoryBlockMoveBehavior()));
+
+        list.add(Pair.of(2, new BlockUpScheduleBehavior()));
+        list.add(Pair.of(2, new BlockUpPlaceBehavior()));
+        list.add(Pair.of(2, new BlockUpDestroyBehavior()));
+
         list.add(Pair.of(3, new PlaceBlockBehavior()));
-        list.add(Pair.of(2, new PlaceBlockMoveBehavior()));
+        list.add(Pair.of(3, new PlaceBlockMoveBehavior()));
 
-        list.add(Pair.of(1, new BlockUpScheduleBehavior()));
-        list.add(Pair.of(0, new BlockUpPlaceBehavior()));
-        list.add(Pair.of(0, new BlockUpDestroyBehavior()));
+        list.add(Pair.of(4, new UpdateValidationMemoryBehavior()));
 
         return list;
     }
@@ -180,5 +217,28 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
         if (target.distSqr(standPos) > touchLimit() * touchLimit())
             return false;
         return maid.level().getBlockState(target).is(BlockTags.LOGS) && isValidNatureTree(maid, target);
+    }
+
+    @Override
+    public boolean tryDestroyBlockUp(EntityMaid maid, BlockPos targetPos) {
+        return tryDestroyBlock(maid, targetPos);
+    }
+
+    @Override
+    public boolean tryPlaceBlock(EntityMaid maid, BlockPos pos) {
+        if (IMaidBlockPlaceTask.super.tryPlaceBlock(maid, pos)) {
+            MemoryUtil.getBlockValidationMemory(maid).setValid(pos);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean tryDestroyBlock(EntityMaid maid, BlockPos blockPos) {
+        if (MaidUtils.destroyBlock(maid, blockPos)) {
+            MemoryUtil.getBlockValidationMemory(maid).remove(blockPos);
+            return true;
+        }
+        return false;
     }
 }

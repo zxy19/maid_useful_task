@@ -16,12 +16,13 @@ abstract public class MaidMoveControlMixin {
     @Final
     private EntityMaid maid;
 
-    @Inject(method = "tick", at = @At("HEAD"), remap = false, cancellable = true)
+    @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tick(CallbackInfo ci) {
-        if (MemoryUtil.getBlockUpContext(this.maid).hasTarget()) {
-            if (MemoryUtil.getBlockUpContext(this.maid).isOnLine(this.maid.blockPosition())) {
-                ci.cancel();
-            }
+        if (switch (MemoryUtil.getCurrent(maid)) {
+            case BLOCKUP_DESTROY, BLOCKUP_DOWN -> true;
+            default -> false;
+        }) {
+            ci.cancel();
         }
     }
 }

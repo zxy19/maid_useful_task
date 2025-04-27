@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import studio.fantasyit.maid_useful_task.memory.CurrentWork;
 import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
 import studio.fantasyit.maid_useful_task.task.IMaidBlockPlaceTask;
 import studio.fantasyit.maid_useful_task.util.Conditions;
@@ -24,8 +25,9 @@ public class PlaceBlockBehavior extends Behavior<EntityMaid> {
     }
 
     @Override
-    protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid p_22539_) {
-        return Conditions.hasReachedValidTargetOrReset(p_22539_);
+    protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid maid) {
+        MemoryUtil.setCurrent(maid, CurrentWork.PLACE);
+        return Conditions.hasReachedValidTargetOrReset(maid);
     }
 
     @Override
@@ -59,5 +61,6 @@ public class PlaceBlockBehavior extends Behavior<EntityMaid> {
         super.stop(p_22548_, p_22549_, p_22550_);
         MemoryUtil.clearPlaceTarget(p_22549_);
         MemoryUtil.clearTarget(p_22549_);
+        MemoryUtil.setCurrent(p_22549_, CurrentWork.IDLE);
     }
 }

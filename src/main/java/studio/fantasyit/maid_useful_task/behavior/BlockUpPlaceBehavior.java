@@ -11,6 +11,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import studio.fantasyit.maid_useful_task.memory.BlockUpContext;
+import studio.fantasyit.maid_useful_task.memory.CurrentWork;
 import studio.fantasyit.maid_useful_task.task.IMaidBlockUpTask;
 import studio.fantasyit.maid_useful_task.util.Conditions;
 import studio.fantasyit.maid_useful_task.util.MaidUtils;
@@ -34,6 +35,7 @@ public class BlockUpPlaceBehavior extends Behavior<EntityMaid> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid p_22539_) {
+        if (!Conditions.isCurrent(p_22539_, CurrentWork.BLOCKUP_UP)) return false;
         if (!MemoryUtil.getBlockUpContext(p_22539_).hasTarget()) return false;
         if (MemoryUtil.getBlockUpContext(p_22539_).getStatus() != BlockUpContext.STATUS.UP) return false;
         return Conditions.hasReachedValidTargetOrReset(p_22539_, 0.8f);
@@ -42,7 +44,7 @@ public class BlockUpPlaceBehavior extends Behavior<EntityMaid> {
     @Override
     protected boolean canStillUse(ServerLevel p_22545_, EntityMaid maid, long p_22547_) {
         if (MemoryUtil.getBlockUpContext(maid).getStatus() != BlockUpContext.STATUS.UP) return false;
-        if (!p_22545_.getBlockState(maid.blockPosition().above().above()).isAir()) return false;
+        if (maid.onGround() && !p_22545_.getBlockState(maid.blockPosition().above().above()).isAir()) return false;
         return !(maid.blockPosition().equals(context.getTargetPos()) && maid.onGround());
     }
 
@@ -99,10 +101,14 @@ public class BlockUpPlaceBehavior extends Behavior<EntityMaid> {
     protected void stop(ServerLevel p_22548_, EntityMaid maid, long p_22550_) {
         super.stop(p_22548_, maid, p_22550_);
         context.setStatus(BlockUpContext.STATUS.IDLE);
-        if (!maid.blockPosition().equals(context.getTargetPos())) {
-            BlockPos startPos = context.getStartPos();
-            BlockPos blockPos = maid.blockPosition();
-            context.setStartTarget(new BlockPos(blockPos.getX(), startPos.getY(), blockPos.getZ()), blockPos);
+        if (context.hasTarget()) {
+            if (!maid.blockPosition().equals(context.getTargetPos())) {
+                BlockPos startPos = context.getStartPos();
+                BlockPos blockPos = maid.blockPosition();
+                context.setStartTarget(new BlockPos(blockPos.getX(), startPos.getY(), blockPos.getZ()), blockPos);
+            }
+
+            MemoryUtil.setCurrent(maid, CurrentWork.BLOCKUP_DESTROY);
         }
         MemoryUtil.clearTarget(maid);
     }

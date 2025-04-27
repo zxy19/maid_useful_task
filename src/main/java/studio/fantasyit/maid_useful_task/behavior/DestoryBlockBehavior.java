@@ -10,9 +10,11 @@ import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 import studio.fantasyit.maid_useful_task.memory.BlockTargetMemory;
+import studio.fantasyit.maid_useful_task.memory.CurrentWork;
 import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
 import studio.fantasyit.maid_useful_task.task.IMaidBlockDestroyTask;
 import studio.fantasyit.maid_useful_task.util.Conditions;
+import studio.fantasyit.maid_useful_task.util.MaidUtils;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 import studio.fantasyit.maid_useful_task.util.WrappedMaidFakePlayer;
 
@@ -32,7 +34,9 @@ public class DestoryBlockBehavior extends Behavior<EntityMaid> {
 
     @Override
     protected boolean checkExtraStartConditions(@NotNull ServerLevel worldIn, @NotNull EntityMaid maid) {
-        return Conditions.hasReachedValidTargetOrReset(maid,1);
+        if (!Conditions.isCurrent(maid, CurrentWork.DESTROY) && !Conditions.isCurrent(maid, CurrentWork.BLOCKUP_DESTROY))
+            return false;
+        return Conditions.hasReachedValidTargetOrReset(maid, 1);
     }
 
 
@@ -48,7 +52,7 @@ public class DestoryBlockBehavior extends Behavior<EntityMaid> {
         super.start(p_22540_, maid, p_22542_);
         BlockTargetMemory blockTargetMemory = MemoryUtil.getDestroyTargetMemory(maid);
         if (blockTargetMemory != null) {
-            blockPosSet =new ArrayList<>(blockTargetMemory.getBlockPosSet());
+            blockPosSet = new ArrayList<>(blockTargetMemory.getBlockPosSet());
             blockPosSet.sort((o1, o2) -> (int) (o1.distSqr(maid.blockPosition()) - o2.distSqr(maid.blockPosition())));
         }
         index = 0;
@@ -87,14 +91,13 @@ public class DestoryBlockBehavior extends Behavior<EntityMaid> {
     }
 
     private void tickDestroyProgress(EntityMaid maid) {
-        float speed = fakePlayer.getMainHandItem().getDestroySpeed(targetBlockState) / fakePlayer.getDigSpeed(targetBlockState, targetPos) / 30;
+        float speed = MaidUtils.getDestroyProgressDelta(maid, targetPos);
         MemoryUtil.setLookAt(maid, targetPos);
-        if (task.availableToGetDrop(maid, fakePlayer, targetPos, targetBlockState)) {
+        if (speed != 0.0f && task.availableToGetDrop(maid, fakePlayer, targetPos, targetBlockState)) {
             maid.swing(InteractionHand.MAIN_HAND);
             destroyProgress += speed;
             if (destroyProgress >= 1f) {
-                maid.getMainHandItem().hurt(1, maid.getRandom(), fakePlayer);
-                task.tryDestroyBlock(maid,targetPos);
+                task.tryDestroyBlock(maid, targetPos);
                 destroyProgress = 0f;
                 targetPos = null;
                 targetBlockState = null;
@@ -110,6 +113,7 @@ public class DestoryBlockBehavior extends Behavior<EntityMaid> {
         super.stop(p_22548_, p_22549_, p_22550_);
         MemoryUtil.clearDestroyTargetMemory(p_22549_);
         MemoryUtil.clearTarget(p_22549_);
+        MemoryUtil.setCurrent(p_22549_, CurrentWork.IDLE);
     }
 
     @Override

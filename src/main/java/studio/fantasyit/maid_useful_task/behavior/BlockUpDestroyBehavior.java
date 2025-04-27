@@ -9,6 +9,7 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.level.block.state.BlockState;
 import studio.fantasyit.maid_useful_task.memory.BlockUpContext;
+import studio.fantasyit.maid_useful_task.memory.CurrentWork;
 import studio.fantasyit.maid_useful_task.task.IMaidBlockUpTask;
 import studio.fantasyit.maid_useful_task.util.Conditions;
 import studio.fantasyit.maid_useful_task.util.MaidUtils;
@@ -28,11 +29,12 @@ public class BlockUpDestroyBehavior extends Behavior<EntityMaid> {
     }
 
     public BlockUpDestroyBehavior() {
-        super(Map.of(),200);
+        super(Map.of(),500);
     }
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid p_22539_) {
+        if(!Conditions.isCurrent(p_22539_, CurrentWork.BLOCKUP_DOWN)) return false;
         if (!MemoryUtil.getBlockUpContext(p_22539_).hasTarget()) return false;
         if (MemoryUtil.getBlockUpContext(p_22539_).getStatus() != BlockUpContext.STATUS.DOWN) return false;
         return Conditions.hasReachedValidTargetOrReset(p_22539_, 0.8f);
@@ -63,8 +65,7 @@ public class BlockUpDestroyBehavior extends Behavior<EntityMaid> {
             BlockPos targetPos = maid.blockPosition().below();
             maid.swing(InteractionHand.MAIN_HAND);
             MemoryUtil.setLookAt(maid, targetPos);
-            BlockState targetBlockState = level.getBlockState(targetPos);
-            float speed = fakePlayer.getMainHandItem().getDestroySpeed(targetBlockState) / fakePlayer.getDigSpeed(targetBlockState, targetPos) / 30;
+            float speed = MaidUtils.getDestroyProgressDelta(maid, targetPos);
             progress += speed;
             if (progress >= 1f) {
                 MaidUtils.destroyBlock(maid, targetPos);
@@ -75,7 +76,8 @@ public class BlockUpDestroyBehavior extends Behavior<EntityMaid> {
     @Override
     protected void stop(ServerLevel p_22548_, EntityMaid maid, long p_22550_) {
         super.stop(p_22548_, maid, p_22550_);
-        context.setStatus(BlockUpContext.STATUS.IDLE);
+        context.clearStartTarget();
         MemoryUtil.clearTarget(maid);
+        MemoryUtil.setCurrent(maid, CurrentWork.IDLE);
     }
 }

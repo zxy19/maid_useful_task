@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import studio.fantasyit.maid_useful_task.util.MaidUtils;
 
 /**
  * From https://github.com/TartaricAcid/TouhouLittleMaid
@@ -23,7 +24,7 @@ abstract public class MaidCenterMoveToBlockTask extends Behavior<EntityMaid> {
     private static final int MAX_DELAY_TIME = 120;
     private final float movementSpeed;
     private final int verticalSearchRange;
-    private final int searchRange;
+    private int searchRange;
     protected int verticalSearchStart;
 
     public MaidCenterMoveToBlockTask(float movementSpeed) {
@@ -33,26 +34,29 @@ abstract public class MaidCenterMoveToBlockTask extends Behavior<EntityMaid> {
     public MaidCenterMoveToBlockTask(float movementSpeed, int verticalSearchRange) {
         this(movementSpeed, verticalSearchRange, 7);
     }
-    public MaidCenterMoveToBlockTask(float movementSpeed, int verticalSearchRange,int searchRange) {
+
+    public MaidCenterMoveToBlockTask(float movementSpeed, int verticalSearchRange, int defaultSearchRange) {
         super(ImmutableMap.of(MemoryModuleType.WALK_TARGET, MemoryStatus.VALUE_ABSENT, InitEntities.TARGET_POS.get(), MemoryStatus.VALUE_ABSENT));
         this.movementSpeed = movementSpeed;
         this.verticalSearchRange = verticalSearchRange;
-        this.searchRange =  searchRange;
+        this.searchRange = defaultSearchRange;
     }
-
+    public void setSearchRange(int searchRange) {
+        this.searchRange = searchRange;
+    }
     protected final void searchForDestination(ServerLevel worldIn, EntityMaid maid) {
         MaidPathFindingBFS pathFinding = this.getOrCreateArrivalMap(worldIn, maid);
         BlockPos centrePos = this.getWorkSearchPos(maid);
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
-        for(int y = this.verticalSearchStart; y <= this.verticalSearchRange; y = y > 0 ? -y : 1 - y) {
-            for(int i = 0; i < searchRange; ++i) {
-                for(int x = 0; x <= i; x = x > 0 ? -x : 1 - x) {
-                    for(int z = x < i && x > -i ? i : 0; z <= i; z = z > 0 ? -z : 1 - z) {
+        for (int y = this.verticalSearchStart; y <= this.verticalSearchRange; y = y > 0 ? -y : 1 - y) {
+            for (int i = 0; i < searchRange; ++i) {
+                for (int x = 0; x <= i; x = x > 0 ? -x : 1 - x) {
+                    for (int z = x < i && x > -i ? i : 0; z <= i; z = z > 0 ? -z : 1 - z) {
                         mutableBlockPos.setWithOffset(centrePos, x, y - 1, z);
-                        if (maid.isWithinRestriction(mutableBlockPos) && this.shouldMoveTo(worldIn, maid, mutableBlockPos) && this.checkPathReach(maid, pathFinding, mutableBlockPos) && this.checkOwnerPos(maid, mutableBlockPos)) {
+                        if (this.shouldMoveTo(worldIn, maid, mutableBlockPos) && this.checkPathReach(maid, pathFinding, mutableBlockPos) && this.checkOwnerPos(maid, mutableBlockPos)) {
                             BehaviorUtils.setWalkAndLookTargetMemories(maid, mutableBlockPos, this.movementSpeed, 0);
-                            maid.getBrain().setMemory((MemoryModuleType)InitEntities.TARGET_POS.get(), new BlockPosTracker(mutableBlockPos));
+                            maid.getBrain().setMemory((MemoryModuleType) InitEntities.TARGET_POS.get(), new BlockPosTracker(mutableBlockPos));
                             this.clearCurrentArrivalMap(pathFinding);
                             return;
                         }
@@ -73,7 +77,7 @@ abstract public class MaidCenterMoveToBlockTask extends Behavior<EntityMaid> {
     }
 
     private BlockPos getWorkSearchPos(EntityMaid maid) {
-        return maid.blockPosition();
+        return MaidUtils.getMaidRestrictCenter(maid);
     }
 
     private boolean checkOwnerPos(EntityMaid maid, BlockPos mutableBlockPos) {
@@ -86,7 +90,9 @@ abstract public class MaidCenterMoveToBlockTask extends Behavior<EntityMaid> {
 
     protected abstract boolean shouldMoveTo(ServerLevel var1, EntityMaid var2, BlockPos var3);
 
-    /** @deprecated */
+    /**
+     * @deprecated
+     */
     @Deprecated(
             forRemoval = true
     )

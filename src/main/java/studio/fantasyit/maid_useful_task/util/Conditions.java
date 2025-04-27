@@ -7,6 +7,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.phys.Vec3;
+import studio.fantasyit.maid_useful_task.memory.CurrentWork;
 import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
 
 import java.util.Optional;
@@ -24,6 +25,7 @@ public class Conditions {
                 Optional<WalkTarget> walkTarget = brain.getMemory(MemoryModuleType.WALK_TARGET);
                 if (walkTarget.isEmpty() || !walkTarget.get().getTarget().currentPosition().equals(targetV3d)) {
                     brain.eraseMemory(InitEntities.TARGET_POS.get());
+                    MemoryUtil.setCurrent(maid, CurrentWork.IDLE);
                 }
                 return false;
             }
@@ -41,10 +43,12 @@ public class Conditions {
 
     public static boolean isGlobalValidTarget(EntityMaid maid, BlockPos pos, BlockPos targetPos) {
         if (MemoryUtil.getBlockUpContext(maid).hasTarget()) {
-            if (targetPos.getY() < maid.getBlockY() && targetPos.getX() == maid.getBlockX() && targetPos.getZ() == maid.getBlockZ())
-                return false;
             return MemoryUtil.getBlockUpContext(maid).isTarget(pos);
         }
         return true;
+    }
+
+    public static boolean isCurrent(EntityMaid maid, CurrentWork currentWork) {
+        return MemoryUtil.getCurrent(maid) == currentWork;
     }
 }

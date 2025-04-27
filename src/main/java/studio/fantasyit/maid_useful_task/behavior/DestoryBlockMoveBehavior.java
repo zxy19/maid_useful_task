@@ -1,13 +1,12 @@
 package studio.fantasyit.maid_useful_task.behavior;
 
-import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.task.MaidMoveToBlockTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.MaidPathFindingBFS;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import studio.fantasyit.maid_useful_task.memory.TaskRateLimitToken;
+import studio.fantasyit.maid_useful_task.memory.CurrentWork;
 import studio.fantasyit.maid_useful_task.task.IMaidBlockDestroyTask;
 import studio.fantasyit.maid_useful_task.util.Conditions;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
@@ -26,16 +25,17 @@ public class DestoryBlockMoveBehavior extends MaidCenterMoveToBlockTask {
 
 
     @Override
-    protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid p_22539_) {
-        if (MemoryUtil.getRateLimitToken(p_22539_).isFor(TaskRateLimitToken.Level.L1)) {
+    protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid maid) {
+        if (!Conditions.isCurrent(maid, CurrentWork.IDLE) && !Conditions.isCurrent(maid, CurrentWork.BLOCKUP_DESTROY))
             return false;
-        }
-        return super.checkExtraStartConditions(p_22538_, p_22539_);
+        return super.checkExtraStartConditions(p_22538_, maid);
     }
 
     @Override
     protected void start(@NotNull ServerLevel p_22540_, @NotNull EntityMaid maid, long p_22542_) {
         super.start(p_22540_, maid, p_22542_);
+        if (maid.hasRestriction())
+            this.setSearchRange((int) maid.getRestrictRadius());
         task = (IMaidBlockDestroyTask) maid.getTask();
         task.tryTakeOutTool(maid);
         searchForDestination(p_22540_, maid);
@@ -43,11 +43,14 @@ public class DestoryBlockMoveBehavior extends MaidCenterMoveToBlockTask {
         if (target != null && blockPosSet != null) {
             blockPosSet.addAll(task.getTryDestroyBlockListBesidesStart(targetPos, target, maid));
             MemoryUtil.setDestroyTargetMemory(maid, blockPosSet);
+            if (Conditions.isCurrent(maid, CurrentWork.IDLE))
+                MemoryUtil.setCurrent(maid, CurrentWork.DESTROY);
         }
     }
+
     @Override
     protected boolean shouldMoveTo(@NotNull ServerLevel serverLevel, @NotNull EntityMaid entityMaid, @NotNull BlockPos blockPos) {
-        if (!task.shouldDestroyBlock(entityMaid, blockPos)) return false;
+        if (!task.shouldDestroyBlock(entityMaid, blockPos.immutable())) return false;
         targetPos = blockPos.immutable();
         if (blockPos instanceof BlockPos.MutableBlockPos mb) {
             for (int dx = 0; dx < task.reachDistance(); dx = dx <= 0 ? 1 - dx : -dx) {
@@ -75,7 +78,10 @@ public class DestoryBlockMoveBehavior extends MaidCenterMoveToBlockTask {
     @Override
     protected @NotNull MaidPathFindingBFS getOrCreateArrivalMap(@NotNull ServerLevel worldIn, @NotNull EntityMaid maid) {
         if (this.pathfindingBFS == null)
-            this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 14);
+            if(maid.hasRestriction())
+                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 14, (int) maid.getRestrictRadius());
+            else
+                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 14);
         return this.pathfindingBFS;
     }
 
