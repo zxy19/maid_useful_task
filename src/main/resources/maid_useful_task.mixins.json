@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "maid_useful_task.refmap.json",
   "mixins": [
+    "FollowMaidMixin",
     "MaidCheckPickupItem",
     "MaidMoveControlMixin",
     "MaidRunOneMixin"

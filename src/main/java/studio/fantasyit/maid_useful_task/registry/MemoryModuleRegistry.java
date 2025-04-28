@@ -23,6 +23,8 @@ public class MemoryModuleRegistry {
             = REGISTER.register("block_up", () -> new MemoryModuleType<>(Optional.of(BlockUpContext.CODEC)));
     public static final RegistryObject<MemoryModuleType<BlockValidationMemory>> BLOCK_VALIDATION
             = REGISTER.register("block_validation", () -> new MemoryModuleType<>(Optional.of(BlockValidationMemory.CODEC)));
+    public static final RegistryObject<MemoryModuleType<BlockPos>> COMMON_BLOCK_CACHE
+            = REGISTER.register("common_block_cache", () -> new MemoryModuleType<>(Optional.empty()));
     public static final RegistryObject<MemoryModuleType<CurrentWork>> CURRENT_WORK = REGISTER.register("current_work", () -> new MemoryModuleType<>(Optional.empty()));
 
     public static void register(IEventBus eventBus) {

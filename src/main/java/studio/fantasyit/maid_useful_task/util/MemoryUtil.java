@@ -80,4 +80,11 @@ public class MemoryUtil {
     public static void setCurrent(EntityMaid maid, CurrentWork currentWork){
         maid.getBrain().setMemory(MemoryModuleRegistry.CURRENT_WORK.get(), currentWork);
     }
+
+    public static void setCommonBlockCache(EntityMaid maid, BlockPos pos){
+        maid.getBrain().setMemory(MemoryModuleRegistry.COMMON_BLOCK_CACHE.get(), pos);
+    }
+    public static BlockPos getCommonBlockCache(EntityMaid maid){
+        return maid.getBrain().getMemory(MemoryModuleRegistry.COMMON_BLOCK_CACHE.get()).orElse(null);
+    }
 }
