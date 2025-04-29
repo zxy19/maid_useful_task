@@ -13,6 +13,10 @@ An extension mod of TLM(Touhou Little Maid). Add some useful tasks to your Maid.
 The maid will cut down the logs around her and plant saplings. You can give the maid an axe and hoe or scissors to speed
 up the maid's ability to cut down trees and destroy leaves!
 
+## Locate 
+
+The maid will search for a specified structure or the player's respawn point based on the item in her hand. If the maid is on the same vehicle as the player (currently only brooms are supported), the player can press a designated button (V by default) to give the maid control or partial control of the carrier.
+
 # More
 
 + The Mod is currently in early development. Everything may change in the future.
