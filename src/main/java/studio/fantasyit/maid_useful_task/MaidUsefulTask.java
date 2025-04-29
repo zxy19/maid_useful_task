@@ -29,6 +29,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
+import studio.fantasyit.maid_useful_task.vehicle.MaidVehicleManager;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(MaidUsefulTask.MODID)
@@ -41,5 +42,6 @@ public class MaidUsefulTask {
     public MaidUsefulTask() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         MemoryModuleRegistry.register(modEventBus);
+        MaidVehicleManager.register();
     }
 }

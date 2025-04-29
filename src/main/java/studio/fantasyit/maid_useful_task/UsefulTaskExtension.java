@@ -3,13 +3,11 @@ package studio.fantasyit.maid_useful_task;
 import com.github.tartaricacid.touhoulittlemaid.api.ILittleMaid;
 import com.github.tartaricacid.touhoulittlemaid.api.LittleMaidExtension;
 import com.github.tartaricacid.touhoulittlemaid.api.entity.ai.IExtraMaidBrain;
-import com.github.tartaricacid.touhoulittlemaid.client.animation.HardcodedAnimationManger;
 import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.ExtraMaidBrainManager;
 import com.github.tartaricacid.touhoulittlemaid.entity.task.TaskManager;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
-import studio.fantasyit.maid_useful_task.animation.FlyAnimation;
 import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
-import studio.fantasyit.maid_useful_task.task.MaidEndEyeTask;
+import studio.fantasyit.maid_useful_task.task.MaidLocateTask;
 import studio.fantasyit.maid_useful_task.task.MaidTreeTask;
 
 import java.util.List;
@@ -20,7 +18,7 @@ public class UsefulTaskExtension implements ILittleMaid {
     public void addMaidTask(TaskManager manager) {
         ILittleMaid.super.addMaidTask(manager);
         manager.add(new MaidTreeTask());
-        manager.add(new MaidEndEyeTask());
+        manager.add(new MaidLocateTask());
     }
 
     @Override
@@ -34,14 +32,11 @@ public class UsefulTaskExtension implements ILittleMaid {
                         MemoryModuleRegistry.BLOCK_UP_TARGET.get(),
                         MemoryModuleRegistry.BLOCK_VALIDATION.get(),
                         MemoryModuleRegistry.CURRENT_WORK.get(),
-                        MemoryModuleRegistry.COMMON_BLOCK_CACHE.get()
+                        MemoryModuleRegistry.COMMON_BLOCK_CACHE.get(),
+                        MemoryModuleRegistry.IS_ALLOW_HANDLE_VEHICLE.get(),
+                        MemoryModuleRegistry.LOCATE_ITEM.get()
                 );
             }
         });
-    }
-
-    @Override
-    public void addHardcodeAnimation(HardcodedAnimationManger manger) {
-        manger.addMaidAnimation(new FlyAnimation());
     }
 }

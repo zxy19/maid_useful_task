@@ -1,4 +1,4 @@
-package studio.fantasyit.maid_useful_task.behavior;
+package studio.fantasyit.maid_useful_task.behavior.common;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.task.MaidCheckRateTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;

@@ -19,7 +19,7 @@ import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
-import studio.fantasyit.maid_useful_task.behavior.*;
+import studio.fantasyit.maid_useful_task.behavior.common.*;
 import studio.fantasyit.maid_useful_task.memory.BlockValidationMemory;
 import studio.fantasyit.maid_useful_task.util.MaidUtils;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;

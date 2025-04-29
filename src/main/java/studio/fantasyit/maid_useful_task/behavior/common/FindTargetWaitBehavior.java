@@ -1,39 +1,42 @@
-package studio.fantasyit.maid_useful_task.behavior;
+package studio.fantasyit.maid_useful_task.behavior.common;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.init.InitEntities;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.StructureTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
-import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
+import studio.fantasyit.maid_useful_task.task.IMaidFindTargetTask;
 import studio.fantasyit.maid_useful_task.util.Conditions;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
-public class EnderEyeWaitBehavior extends Behavior<EntityMaid> {
+public class FindTargetWaitBehavior extends Behavior<EntityMaid> {
 
-    public EnderEyeWaitBehavior() {
+    public FindTargetWaitBehavior() {
         super(ImmutableMap.of(InitEntities.TARGET_POS.get(), MemoryStatus.VALUE_PRESENT));
     }
 
     @Override
-    protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid maid) {
-        if (!maid.getMainHandItem().is(Items.ENDER_EYE)) return false;
+    protected boolean checkExtraStartConditions(ServerLevel serverLevel, EntityMaid maid) {
+        IMaidFindTargetTask task = (IMaidFindTargetTask) maid.getTask();
+        if (task.findTarget(serverLevel, maid) == null) return true;
         if (maid.hasRestriction()) return false;
         LivingEntity owner = maid.getOwner();
-        if (owner != null && maid.distanceTo(owner) > 6) {
+        if (owner != null && maid.distanceTo(owner) > task.maxOutDistance()) {
             return true;
         }
         return Conditions.hasReachedValidTargetOrReset(maid, 4);
     }
 
     @Override
-    protected void start(ServerLevel serverlevel, EntityMaid maid, long p_22542_) {
+    protected void start(@NotNull ServerLevel serverLevel, EntityMaid maid, long p_22542_) {
+        IMaidFindTargetTask task = (IMaidFindTargetTask) maid.getTask();
+        if (task.findTarget(serverLevel, maid) == null) {
+            task.clearCache(maid);
+        }
         MemoryUtil.clearTarget(maid);
     }
 }

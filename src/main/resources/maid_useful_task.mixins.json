@@ -8,7 +8,8 @@
     "FollowMaidMixin",
     "MaidCheckPickupItem",
     "MaidMoveControlMixin",
-    "MaidRunOneMixin"
+    "MaidRunOneMixin",
+    "VehicleBroomMixin"
   ],
   "client": [
   ],
