@@ -7,5 +7,8 @@
   "maid_useful_task.allow_handle_vehicle.none": "Not allowing maid control vehicle",
   "maid_useful_task.allow_handle_vehicle.rot_only": "Allow maid control rotation only",
   "maid_useful_task.allow_handle_vehicle.full": "Allow maid control vehicle",
-  "key.maid_useful_tasks.categories.main": "Maid Useful Tasks"
+  "key.maid_useful_tasks.categories.main": "Maid Useful Tasks",
+  "gui.maid_useful_task.logging.plant": "Plant Saplings",
+  "gui.maid_useful_task.no": "No",
+  "gui.maid_useful_task.yes": "Yes"
 }

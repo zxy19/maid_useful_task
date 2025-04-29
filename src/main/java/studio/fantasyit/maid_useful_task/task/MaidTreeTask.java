@@ -4,13 +4,18 @@ import com.github.tartaricacid.touhoulittlemaid.api.task.IMaidTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -20,7 +25,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.behavior.common.*;
+import studio.fantasyit.maid_useful_task.data.MaidLoggingConfig;
 import studio.fantasyit.maid_useful_task.memory.BlockValidationMemory;
+import studio.fantasyit.maid_useful_task.menu.MaidLoggingConfigGui;
+import studio.fantasyit.maid_useful_task.registry.GuiRegistry;
 import studio.fantasyit.maid_useful_task.util.MaidUtils;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 import studio.fantasyit.maid_useful_task.util.WrappedMaidFakePlayer;
@@ -53,6 +61,21 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
     }
 
     @Override
+    public MenuProvider getTaskConfigGuiProvider(EntityMaid maid) {
+        return new MenuProvider() {
+            @Override
+            public Component getDisplayName() {
+                return Component.literal("");
+            }
+
+            @Override
+            public AbstractContainerMenu createMenu(int index, Inventory playerInventory, Player player) {
+                return new MaidLoggingConfigGui.Container(index, playerInventory, maid.getId());
+            }
+        };
+    }
+
+    @Override
     public boolean shouldDestroyBlock(EntityMaid maid, BlockPos pos) {
         if (MemoryUtil.getBlockUpContext(maid).hasTarget()) {
             if (pos.getY() < maid.getBlockY() && pos.getX() == maid.getBlockX() && pos.getZ() == maid.getBlockZ()) {
@@ -79,6 +102,7 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
 
     @Override
     public boolean shouldPlaceItemStack(EntityMaid maid, ItemStack itemStack) {
+        if (!maid.getOrCreateData(MaidLoggingConfig.KEY, MaidLoggingConfig.Data.getDefault()).plant()) return false;
         return itemStack.is(ItemTags.SAPLINGS);
     }
 

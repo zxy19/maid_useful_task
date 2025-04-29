@@ -4,8 +4,11 @@ import com.github.tartaricacid.touhoulittlemaid.api.ILittleMaid;
 import com.github.tartaricacid.touhoulittlemaid.api.LittleMaidExtension;
 import com.github.tartaricacid.touhoulittlemaid.api.entity.ai.IExtraMaidBrain;
 import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.ExtraMaidBrainManager;
+import com.github.tartaricacid.touhoulittlemaid.entity.data.TaskDataRegister;
 import com.github.tartaricacid.touhoulittlemaid.entity.task.TaskManager;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import studio.fantasyit.maid_useful_task.data.MaidConfigKeys;
+import studio.fantasyit.maid_useful_task.data.MaidLoggingConfig;
 import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
 import studio.fantasyit.maid_useful_task.task.MaidLocateTask;
 import studio.fantasyit.maid_useful_task.task.MaidTreeTask;
@@ -38,5 +41,12 @@ public class UsefulTaskExtension implements ILittleMaid {
                 );
             }
         });
+    }
+
+    @Override
+    public void registerTaskData(TaskDataRegister register) {
+        MaidConfigKeys.addKey(MaidLoggingConfig.LOCATION,
+                MaidLoggingConfig.KEY = register.register(new MaidLoggingConfig()),
+                MaidLoggingConfig.Data::getDefault);
     }
 }
