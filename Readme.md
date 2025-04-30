@@ -4,8 +4,6 @@
 
 An extension mod of TLM(Touhou Little Maid). Add some useful tasks to your Maid.
 
-> Currently, it's logging only.
-
 # Features
 
 ## Logging
@@ -16,6 +14,10 @@ up the maid's ability to cut down trees and destroy leaves!
 ## Locate 
 
 The maid will search for a specified structure or the player's respawn point based on the item in her hand. If the maid is on the same vehicle as the player (currently only brooms are supported), the player can press a designated button (V by default) to give the maid control or partial control of the carrier.
+
+## Revive
+
+The Maid will revive nearby fallen players. If there is an undead totem in the Maid's bauble, the Maid will use one.
 
 # More
 

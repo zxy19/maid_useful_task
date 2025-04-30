@@ -42,6 +42,7 @@ public class MaidUsefulTask {
     @SuppressWarnings("removal")
     public MaidUsefulTask() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         MemoryModuleRegistry.register(modEventBus);
         GuiRegistry.init(modEventBus);
         MaidVehicleManager.register();

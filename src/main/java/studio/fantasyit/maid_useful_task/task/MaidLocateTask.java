@@ -13,6 +13,7 @@ import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
+import studio.fantasyit.maid_useful_task.Config;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.behavior.common.FindTargetMoveBehavior;
 import studio.fantasyit.maid_useful_task.behavior.common.FindTargetWaitBehavior;
@@ -52,7 +53,10 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
     public boolean enableLookAndRandomWalk(EntityMaid maid) {
         return false;
     }
-
+    @Override
+    public boolean isEnable(EntityMaid maid) {
+        return Config.enableLocateTask;
+    }
     @Override
     public @Nullable BlockPos findTarget(ServerLevel level, EntityMaid maid) {
         BlockPos target = null;

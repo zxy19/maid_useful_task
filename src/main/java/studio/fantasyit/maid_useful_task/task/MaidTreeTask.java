@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import studio.fantasyit.maid_useful_task.Config;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.behavior.common.*;
 import studio.fantasyit.maid_useful_task.data.MaidLoggingConfig;
@@ -58,6 +59,11 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
     @Override
     public SoundEvent getAmbientSound(EntityMaid entityMaid) {
         return null;
+    }
+
+    @Override
+    public boolean isEnable(EntityMaid maid) {
+        return Config.enableLoggingTask;
     }
 
     @Override

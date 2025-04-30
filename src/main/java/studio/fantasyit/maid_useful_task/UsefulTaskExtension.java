@@ -7,10 +7,13 @@ import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.ExtraMaidBrainMa
 import com.github.tartaricacid.touhoulittlemaid.entity.data.TaskDataRegister;
 import com.github.tartaricacid.touhoulittlemaid.entity.task.TaskManager;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import studio.fantasyit.maid_useful_task.compat.PlayerRevive;
 import studio.fantasyit.maid_useful_task.data.MaidConfigKeys;
 import studio.fantasyit.maid_useful_task.data.MaidLoggingConfig;
+import studio.fantasyit.maid_useful_task.data.MaidReviveConfig;
 import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
 import studio.fantasyit.maid_useful_task.task.MaidLocateTask;
+import studio.fantasyit.maid_useful_task.task.MaidRevivePlayerTask;
 import studio.fantasyit.maid_useful_task.task.MaidTreeTask;
 
 import java.util.List;
@@ -20,8 +23,13 @@ public class UsefulTaskExtension implements ILittleMaid {
     @Override
     public void addMaidTask(TaskManager manager) {
         ILittleMaid.super.addMaidTask(manager);
-        manager.add(new MaidTreeTask());
-        manager.add(new MaidLocateTask());
+        if (Config.enableLoggingTask)
+            manager.add(new MaidTreeTask());
+        if (Config.enableLocateTask)
+            manager.add(new MaidLocateTask());
+        if (Config.enableReviveTask)
+            if (PlayerRevive.isEnable())
+                manager.add(new MaidRevivePlayerTask());
     }
 
     @Override
@@ -48,5 +56,8 @@ public class UsefulTaskExtension implements ILittleMaid {
         MaidConfigKeys.addKey(MaidLoggingConfig.LOCATION,
                 MaidLoggingConfig.KEY = register.register(new MaidLoggingConfig()),
                 MaidLoggingConfig.Data::getDefault);
+        MaidConfigKeys.addKey(MaidReviveConfig.LOCATION,
+                MaidReviveConfig.KEY = register.register(new MaidReviveConfig()),
+                MaidReviveConfig.Data::getDefault);
     }
 }

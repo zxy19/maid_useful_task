@@ -211,6 +211,24 @@ public class WrappedMaidFakePlayer extends FakePlayer {
     }
 
     @Override
+    public float distanceTo(Entity p_20271_) {
+        if (maid == null) return super.distanceTo(p_20271_);
+        return maid.distanceTo(p_20271_);
+    }
+
+    @Override
+    public double distanceToSqr(double p_20276_, double p_20277_, double p_20278_) {
+        if (maid == null) return super.distanceToSqr(p_20276_, p_20277_, p_20278_);
+        return maid.distanceToSqr(p_20276_, p_20277_, p_20278_);
+    }
+
+    @Override
+    public double distanceToSqr(Vec3 p_20239_) {
+        if (maid == null) return super.distanceToSqr(p_20239_);
+        return maid.distanceToSqr(p_20239_);
+    }
+
+    @Override
     public void teleportTo(double p_8969_, double p_8970_, double p_8971_) {
         if (maid == null) return;
         maid.teleportTo(p_8969_, p_8970_, p_8971_);

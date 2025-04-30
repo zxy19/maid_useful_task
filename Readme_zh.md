@@ -4,8 +4,6 @@ For English version, visit [English Version](Readme.md)
 
 一个车万女仆的拓展模组，添加了一些实用的女仆任务。
 
-> 然而，目前只有砍树
-
 # Features
 
 ## Logging
@@ -15,6 +13,10 @@ For English version, visit [English Version](Readme.md)
 ## Locate
 
 女仆会根据手上的物品寻找指定的结构或者玩家出生点。如果女仆和玩家在同一载具上（目前只支持扫帚），玩家可以按下指定按键（默认为V）来让女仆控制或部分控制载具。
+
+## Revive
+
+女仆会救援附近倒地的玩家。如果女仆饰品中有不死图腾，则女仆会使用一个。
 
 # More
 
