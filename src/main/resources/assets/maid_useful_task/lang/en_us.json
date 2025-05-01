@@ -1,10 +1,10 @@
 {
   "task.maid_useful_task.maid_tree": "Logging",
-  "task.maid_useful_task.maid_tree.description": "The maid will cut down the logs around her and plant saplings.",
+  "task.maid_useful_task.maid_tree.desc": "The maid will cut down the logs around her and plant saplings.",
   "task.maid_useful_task.locate": "Locate",
-  "task.maid_useful_task.locate.description": "The maid can locate the some structure or your home with specific items.",
+  "task.maid_useful_task.locate.desc": "The maid can locate the some structure or your home with specific items.",
   "task.maid_useful_task.revive_player": "Revive Player",
-  "task.maid_useful_task.revive_player.description": "The maid will revive nearby bleeding player.",
+  "task.maid_useful_task.revive_player.desc": "The maid will revive nearby bleeding player.",
   "key.maid_useful_tasks.switch_vehicle_control": "Switch Vehicle Control Mode",
   "maid_useful_task.allow_handle_vehicle.none": "Not allowing maid control vehicle",
   "maid_useful_task.allow_handle_vehicle.rot_only": "Allow maid control rotation only",

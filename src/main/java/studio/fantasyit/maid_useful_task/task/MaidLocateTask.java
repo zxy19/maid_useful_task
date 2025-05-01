@@ -4,6 +4,8 @@ import com.github.tartaricacid.touhoulittlemaid.api.task.IMaidTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -12,6 +14,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.Config;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
@@ -53,10 +58,12 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
     public boolean enableLookAndRandomWalk(EntityMaid maid) {
         return false;
     }
+
     @Override
     public boolean isEnable(EntityMaid maid) {
         return Config.enableLocateTask;
     }
+
     @Override
     public @Nullable BlockPos findTarget(ServerLevel level, EntityMaid maid) {
         BlockPos target = null;
@@ -81,6 +88,35 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
                 LivingEntity owner = maid.getOwner();
                 if (owner != null) {
                     target = owner.getSleepingPos().orElse(maid.level().getSharedSpawnPos());
+                }
+            }
+        } else if (maid.getMainHandItem().is(Items.FILLED_MAP)) {
+            target = MemoryUtil.getCommonBlockCache(maid);
+            if (target == null) {
+                MapItemSavedData savedData = MapItem.getSavedData(itemStack, maid.level());
+                if (savedData != null) {
+                    BlockPos.MutableBlockPos tmpTarget = new BlockPos.MutableBlockPos(savedData.centerX, level.getSeaLevel(), savedData.centerZ);
+
+                    CompoundTag tag = itemStack.getOrCreateTag();
+                    savedData.getBanners()
+                            .stream()
+                            .findFirst()
+                            .ifPresent(t -> {
+                                tmpTarget.set(t.getPos().immutable());
+                            });
+                    tag.getList("Decorations", Tag.TAG_COMPOUND)
+                            .stream()
+                            .filter(t -> ((CompoundTag) t).getByte("type") == 26)
+                            .findFirst()
+                            .ifPresent(t -> {
+                                CompoundTag decoration = (CompoundTag) t;
+                                tmpTarget.setX(decoration.getInt("x"));
+                                tmpTarget.setZ(decoration.getInt("z"));
+                            });
+
+
+                    target = tmpTarget.immutable();
+                    MemoryUtil.setCommonBlockCache(maid, target);
                 }
             }
         } else {

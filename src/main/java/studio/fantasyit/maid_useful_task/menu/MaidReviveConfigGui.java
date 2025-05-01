@@ -20,7 +20,7 @@ public class MaidReviveConfigGui extends MaidTaskConfigGui<MaidReviveConfigGui.C
 
     public static class Container extends TaskConfigContainer {
         public Container(int id, Inventory inventory, int entityId) {
-            super(GuiRegistry.MAID_LOGGING_CONFIG_GUI.get(), id, inventory, entityId);
+            super(GuiRegistry.MAID_REVIVE_CONFIG_GUI.get(), id, inventory, entityId);
         }
     }
 

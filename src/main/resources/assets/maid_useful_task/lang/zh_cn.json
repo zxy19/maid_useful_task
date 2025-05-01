@@ -1,7 +1,7 @@
 {
   "gui.maid_useful_task.logging.plant": "种植树苗",
   "gui.maid_useful_task.no": "否",
-  "gui.maid_useful_task.revive.ownerOnly": "Only revive owner",
+  "gui.maid_useful_task.revive.ownerOnly": "只救援主人",
   "gui.maid_useful_task.yes": "是",
   "key.maid_useful_tasks.categories.main": "女仆实用任务",
   "key.maid_useful_tasks.switch_vehicle_control": "切换载具控制模式",
@@ -9,9 +9,9 @@
   "maid_useful_task.allow_handle_vehicle.none": "不允许女仆控制载具",
   "maid_useful_task.allow_handle_vehicle.rot_only": "只允许女仆控制旋转",
   "task.maid_useful_task.locate": "定位",
-  "task.maid_useful_task.locate.description": "女仆会根据手持物品定位指定的结构或你的出生点",
+  "task.maid_useful_task.locate.desc": "女仆会根据手持物品定位指定的结构或你的出生点",
   "task.maid_useful_task.maid_tree": "伐木",
-  "task.maid_useful_task.maid_tree.description": "女仆会砍伐身边的原木并种下树苗",
+  "task.maid_useful_task.maid_tree.desc": "女仆会砍伐身边的原木并种下树苗",
   "task.maid_useful_task.revive_player": "救援玩家",
-  "task.maid_useful_task.revive_player.description": "女仆会救援附近倒地的玩家"
+  "task.maid_useful_task.revive_player.desc": "女仆会救援附近倒地的玩家"
 }

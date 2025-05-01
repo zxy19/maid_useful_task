@@ -25,6 +25,10 @@ public class Config {
     private static final ForgeConfigSpec.BooleanValue ENABLE_REVIVE_TOTEM = BUILDER
             .define("revive.totem", true);
 
+    private static final ForgeConfigSpec.BooleanValue ENABLE_VEHICLE_CONTROL_FULL = BUILDER
+            .define("vehicle_control.full", true);
+    private static final ForgeConfigSpec.BooleanValue ENABLE_VEHICLE_CONTROL_ROTATE = BUILDER
+            .define("vehicle_control.rotate", true);
 
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
@@ -35,6 +39,8 @@ public class Config {
     public static boolean enableReviveAggro = false;
     public static boolean enableReviveTotem = false;
 
+    public static boolean enableVehicleControlFull = false;
+    public static boolean enableVehicleControlRotate = false;
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
         enableLoggingTask = ENABLE_LOGGING.get();
@@ -42,5 +48,7 @@ public class Config {
         enableLocateTask = ENABLE_LOCATE.get();
         enableReviveAggro = ENABLE_REVIVE_AGGRO.get();
         enableReviveTotem = ENABLE_REVIVE_TOTEM.get();
+        enableVehicleControlFull = ENABLE_VEHICLE_CONTROL_FULL.get();
+        enableVehicleControlRotate = ENABLE_VEHICLE_CONTROL_ROTATE.get();
     }
 }

@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
 import org.jetbrains.annotations.Nullable;
+import studio.fantasyit.maid_useful_task.Config;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 import studio.fantasyit.maid_useful_task.vehicle.MaidVehicleControlType;
 
@@ -34,6 +35,10 @@ public class MaidAllowHandleVehicle {
         if (entity instanceof EntityMaid maid) {
             MaidVehicleControlType[] values = MaidVehicleControlType.values();
             MaidVehicleControlType allowMode = values[(MemoryUtil.getAllowHandleVehicle(maid).ordinal() + 1) % values.length];
+            while ((allowMode == MaidVehicleControlType.FULL && !Config.enableVehicleControlFull)
+                    || (allowMode == MaidVehicleControlType.ROT_ONLY && !Config.enableVehicleControlRotate)) {
+                allowMode = values[(allowMode.ordinal() + 1) % values.length];
+            }
             MemoryUtil.setAllowHandleVehicle(maid, allowMode);
             Component component = switch (allowMode) {
                 case NONE -> Component.translatable("maid_useful_task.allow_handle_vehicle.none");
