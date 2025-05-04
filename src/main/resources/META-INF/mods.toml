@@ -70,4 +70,11 @@ description='''${mod_description}'''
    versionRange="[1.2.2,)"
    ordering="AFTER"
    side="BOTH"
+[[dependencies."${mod_id}"]]
+   modId="playerrevive"
+   mandatory=false
+   versionRange="[2.0.16,)"
+   ordering="AFTER"
+   side="BOTH"
+
 

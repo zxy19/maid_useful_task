@@ -69,7 +69,7 @@ abstract public class VehicleBroomMixin extends AbstractEntityFromItem implement
         this.maid_useful_tasks$vc_type = MaidVehicleControlType.NONE;
     }
 
-    @Inject(method = "tickRidden", at = @At(value = "INVOKE", target = "Lcom/github/tartaricacid/touhoulittlemaid/entity/item/AbstractEntityFromItem;tickRidden(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;)V"))
+    @Inject(method = "tickRidden", at = @At(value = "TAIL"))
     public void maid_useful_tasks$tickRidden(CallbackInfo ci) {
         if (maid_useful_tasks$vc_type == MaidVehicleControlType.NONE) {
             return;

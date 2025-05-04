@@ -45,7 +45,7 @@ public class MaidRevivePlayerTask implements IMaidTask {
 
     @Override
     public boolean isEnable(EntityMaid maid) {
-        return PlayerRevive.isEnable() && Config.enableReviveAggro;
+        return PlayerRevive.isEnable() && Config.enableReviveTask;
     }
 
     @Override
