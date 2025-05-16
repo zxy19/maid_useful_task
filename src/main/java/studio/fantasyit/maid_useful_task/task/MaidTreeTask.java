@@ -180,15 +180,16 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
 
 
     protected boolean isValidNatureTree(EntityMaid maid, BlockPos startPos) {
-        return isValidNatureTree(maid, startPos, new HashSet<>());
+        return isValidNatureTree(maid, startPos, new HashSet<>(), 0);
     }
 
-    protected boolean isValidNatureTree(EntityMaid maid, BlockPos startPos, Set<BlockPos> visited) {
+    protected boolean isValidNatureTree(EntityMaid maid, BlockPos startPos, Set<BlockPos> visited, int depth) {
         BlockValidationMemory validationMemory = MemoryUtil.getBlockValidationMemory(maid);
         if (validationMemory.hasRecord(startPos))
             return validationMemory.isValid(startPos, false);
         if (visited.contains(startPos))
             return false;
+        if (depth > 100) return false;
         visited.add(startPos);
         boolean valid = false;
         final int[] dv = {0, 1, -1};
@@ -197,10 +198,10 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
                 for (int dy : dv) {
                     BlockPos offset = startPos.offset(dx, dy, dz);
                     BlockState blockState = maid.level().getBlockState(offset);
-                    if (blockState.is(BlockTags.LEAVES) && !blockState.getValue(LeavesBlock.PERSISTENT)) {
+                    if (blockState.is(BlockTags.LEAVES) && blockState.hasProperty(LeavesBlock.PERSISTENT) && !blockState.getValue(LeavesBlock.PERSISTENT)) {
                         valid = true;
                     }
-                    if (blockState.is(BlockTags.LOGS) && isValidNatureTree(maid, offset, visited)) {
+                    if (blockState.is(BlockTags.LOGS) && isValidNatureTree(maid, offset, visited, depth + 1)) {
                         valid = true;
                     }
                 }
@@ -270,5 +271,19 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
             return true;
         }
         return false;
+    }
+
+    /**
+     * 此处判断当home模式未开启时，不允许上搭。
+     * @param maid
+     * @param center
+     * @param maxUp
+     * @return
+     */
+    @Override
+    public oshi.util.tuples.Pair<BlockPos, BlockPos> findTargetPosBlockUp(EntityMaid maid, BlockPos center, int maxUp) {
+        if (maid.isHomeModeEnable())
+            return IMaidBlockUpTask.super.findTargetPosBlockUp(maid, center, maxUp);
+        return null;
     }
 }

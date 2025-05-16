@@ -17,7 +17,9 @@ The maid will search for a specified structure or the player's respawn point bas
 
 ## Revive
 
-The Maid will revive nearby fallen players. If there is an undead totem in the Maid's bauble, the Maid will use one.
+Requires "Player Revive" mod.
+
+The Maid will revive nearby fallen players. If there is an undead totem in the Maid's bauble, the Maid will use one (The maid consumes a totem to skip your revive countdown, instead of just consuming the totem to not die like that in vanilla).
 
 # More
 
