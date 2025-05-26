@@ -47,9 +47,16 @@ public class SupportEffectBehavior extends Behavior<EntityMaid> {
         return memory.map(list -> list
                 .find(entity -> entity instanceof Monster)
                 .map(monster -> (Monster) monster)
-                .anyMatch(monster -> {
-                    if (monster.getTarget() != null && monster.getTarget().equals(player)) {
+                .map(Mob::getTarget)
+                .anyMatch(target -> {
+                    if (target == null)
+                        return false;
+                    if (target.equals(player)) {
                         return true;
+                    }
+                    if (target instanceof TamableAnimal tamed) {
+                        if (tamed.getOwner() != null && tamed.getOwner().equals(player))
+                            return true;
                     }
                     return false;
                 })
