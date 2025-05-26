@@ -176,6 +176,8 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
     @Override
     protected void stop(ServerLevel p_22548_, EntityMaid maid, long p_22550_) {
         PlayerReviveServer.removePlayerAsHelper(WrappedMaidFakePlayer.get(maid));
+        if (!bleeding.isBleeding())
+            targetPlayer.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 200));
         for (UUID uuid : aggroEntities) {
             Entity entity = p_22548_.getEntity(uuid);
             if (entity instanceof Monster monster && entity.isAlive())

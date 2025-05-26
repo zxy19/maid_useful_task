@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.Config;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.behavior.PlayerReviveBehavior;
+import studio.fantasyit.maid_useful_task.behavior.SupportEffectBehavior;
 import studio.fantasyit.maid_useful_task.compat.PlayerRevive;
 import studio.fantasyit.maid_useful_task.menu.MaidLoggingConfigGui;
 import studio.fantasyit.maid_useful_task.menu.MaidReviveConfigGui;
@@ -62,6 +63,7 @@ public class MaidRevivePlayerTask implements IMaidTask {
     public List<Pair<Integer, BehaviorControl<? super EntityMaid>>> createBrainTasks(EntityMaid entityMaid) {
         ArrayList<Pair<Integer, BehaviorControl<? super EntityMaid>>> ret = new ArrayList<>();
         ret.add(Pair.of(1, new PlayerReviveBehavior()));
+        ret.add(Pair.of(1, new SupportEffectBehavior()));
         return ret;
     }
 
