@@ -165,10 +165,10 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    compileOnly fg.deobf("curse.maven:touhou-little-maid-355044:6440955")
+    compileOnly fg.deobf("curse.maven:touhou-little-maid-355044:6596061")
     compileOnly fg.deobf("curse.maven:playerrevive-266890:6048921")
     compileOnly fg.deobf("curse.maven:creativecore-257814:6383884")
-    runtimeOnly fg.deobf("curse.maven:touhou-little-maid-355044:6440955")
+    runtimeOnly fg.deobf("curse.maven:touhou-little-maid-355044:6596061")
     runtimeOnly fg.deobf("curse.maven:maid-storage-manager-1210244:6455832")
     runtimeOnly fg.deobf("curse.maven:playerrevive-266890:6048921")
     runtimeOnly fg.deobf("curse.maven:creativecore-257814:6383884")

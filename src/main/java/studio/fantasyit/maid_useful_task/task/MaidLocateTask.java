@@ -4,14 +4,18 @@ import com.github.tartaricacid.touhoulittlemaid.api.task.IMaidTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.BehaviorControl;
+import net.minecraft.world.item.CompassItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
@@ -85,9 +89,34 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
         } else if (maid.getMainHandItem().is(Items.COMPASS)) {
             target = MemoryUtil.getCommonBlockCache(maid);
             if (target == null) {
+                GlobalPos globalPos;
+                if (CompassItem.isLodestoneCompass(itemStack)) {
+                    globalPos = CompassItem.getLodestonePosition(itemStack.getOrCreateTag());
+                } else {
+                    globalPos = CompassItem.getSpawnPosition(level);
+                }
+                if (globalPos != null && level.dimension().equals(globalPos.dimension())) {
+                    MemoryUtil.setCommonBlockCache(maid, globalPos.pos());
+                    target = globalPos.pos();
+                }
+            }
+        } else if (maid.getMainHandItem().is(ItemTags.BEDS)) {
+            target = MemoryUtil.getCommonBlockCache(maid);
+            if (target == null) {
                 LivingEntity owner = maid.getOwner();
-                if (owner != null) {
-                    target = owner.getSleepingPos().orElse(maid.level().getSharedSpawnPos());
+                if (owner instanceof ServerPlayer player) {
+                    if (player.getRespawnDimension().equals(level.dimension())) {
+                        target = player.getRespawnPosition();
+                        if (target == null) {
+                            GlobalPos globalRespawn = CompassItem.getSpawnPosition(level);
+                            if (globalRespawn != null && level.dimension().equals(globalRespawn.dimension())) {
+                                target = globalRespawn.pos();
+                            }
+                        }
+                    }
+                    if (target == null) {
+                        MemoryUtil.setCommonBlockCache(maid, target);
+                    }
                 }
             }
         } else if (maid.getMainHandItem().is(Items.FILLED_MAP)) {
@@ -130,3 +159,4 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
         MemoryUtil.clearCommonBlockCache(maid);
     }
 }
+

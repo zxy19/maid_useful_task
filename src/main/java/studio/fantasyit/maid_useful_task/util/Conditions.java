@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public class Conditions {
     public static boolean hasReachedValidTargetOrReset(EntityMaid maid) {
-        return hasReachedValidTargetOrReset(maid, 2);
+        return hasReachedValidTargetOrReset(maid, 2.5f);
     }
 
     public static boolean hasReachedValidTargetOrReset(EntityMaid maid, float closeEnough) {

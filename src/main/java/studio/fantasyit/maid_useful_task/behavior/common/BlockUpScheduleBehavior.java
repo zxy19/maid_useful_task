@@ -45,9 +45,11 @@ public class BlockUpScheduleBehavior extends Behavior<EntityMaid> {
                 if (context.getStatus() == BlockUpContext.STATUS.DOWN) {
                     MemoryUtil.setTarget(maid, context.getTargetPos(), 0.5f);
                     MemoryUtil.setCurrent(maid, CurrentWork.BLOCKUP_DOWN);
-                } else {
+                } else if (maid.canPathReach(context.getStartPos())) {
                     MemoryUtil.setTarget(maid, context.getStartPos(), 0.5f);
                     MemoryUtil.setCurrent(maid, CurrentWork.BLOCKUP_UP);
+                } else {
+                    context.clearStartTarget();
                 }
             } else if (!context.isOnLine(maid.blockPosition()) || context.getStartPos().equals(context.getTargetPos())) {
                 context.clearStartTarget();

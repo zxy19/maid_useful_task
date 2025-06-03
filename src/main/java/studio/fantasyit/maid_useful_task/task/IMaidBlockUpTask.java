@@ -51,6 +51,7 @@ public interface IMaidBlockUpTask {
                 while (!level.getBlockState(ground).canBeReplaced()) ground.move(0, 1, 0);
                 if (notAvailable.isVis(ground)) continue;
                 //地面基本判断
+                if (!PosUtils.isSafePos(level, ground)) continue;
                 if (!PosUtils.isFourSideAir(level, ground.immutable())) continue;
                 if (!pathFindingBFS.canPathReach(ground)) continue;
                 boolean valid = true;

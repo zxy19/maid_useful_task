@@ -62,8 +62,9 @@ public interface IMaidBlockDestroyTask {
                     for (int dz : dv) {
                         if (dx == 0 && dy == 0 && dz == 0) continue;
                         BlockPos target = pos.offset(dx, dy, dz);
-                        if (Math.abs(target.getX() - standPos.getX()) > maxDXZ || Math.abs(target.getZ() - standPos.getZ()) > maxDXZ)
-                            continue;
+//                        if (Math.abs(target.getX() - standPos.getX()) > maxDXZ || Math.abs(target.getZ() - standPos.getZ()) > maxDXZ)
+//                            continue;
+                        //上代码不明所以，删除待查
                         if (target.distSqr(standPos) > reachDistance() * reachDistance()) continue;
                         if (marked.contains(target)) continue;
                         if (!shouldDestroyBlock(maid, target)) continue;

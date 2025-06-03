@@ -10,6 +10,7 @@ import studio.fantasyit.maid_useful_task.memory.CurrentWork;
 import studio.fantasyit.maid_useful_task.task.IMaidBlockDestroyTask;
 import studio.fantasyit.maid_useful_task.util.Conditions;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
+import studio.fantasyit.maid_useful_task.util.PosUtils;
 
 import java.util.List;
 
@@ -57,6 +58,7 @@ public class DestoryBlockMoveBehavior extends MaidCenterMoveToBlockTask {
                 for (int dy = 0; dy < task.reachDistance(); dy = dy <= 0 ? 1 - dy : -dy) {
                     for (int dz = 0; dz < task.reachDistance(); dz = dz <= 0 ? 1 - dz : -dz) {
                         BlockPos pos = mb.offset(dx, dy, dz);
+                        if (!PosUtils.isSafePos(serverLevel, pos)) continue;
                         if (!Conditions.isGlobalValidTarget(entityMaid, pos, targetPos)) continue;
                         if (pos.distSqr(targetPos) > task.reachDistance() * task.reachDistance()) continue;
                         if (entityMaid.isWithinRestriction(pos) && pathfindingBFS.canPathReach(pos)) {
@@ -78,7 +80,7 @@ public class DestoryBlockMoveBehavior extends MaidCenterMoveToBlockTask {
     @Override
     protected @NotNull MaidPathFindingBFS getOrCreateArrivalMap(@NotNull ServerLevel worldIn, @NotNull EntityMaid maid) {
         if (this.pathfindingBFS == null)
-            if(maid.hasRestriction())
+            if (maid.hasRestriction())
                 this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 14, (int) maid.getRestrictRadius());
             else
                 this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 14);
