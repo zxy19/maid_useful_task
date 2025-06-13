@@ -41,4 +41,8 @@ public class MaidVehicleManager {
             }
         });
     }
+
+    public static void stopControlling(EntityMaid maid) {
+        MaidVehicleManager.getControllableVehicle(maid).ifPresent(vehicle -> vehicle.maidStopControlVehicle(maid));
+    }
 }

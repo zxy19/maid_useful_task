@@ -15,6 +15,8 @@ public class MaidTickEvent {
             if (event.getMaid().getTask() instanceof IMaidVehicleControlTask imvc && event.getMaid().getVehicle() != null) {
                 imvc.tick(sl, event.getMaid());
                 MaidVehicleManager.syncVehicleParameter(event.getMaid());
+            }else if(event.getMaid().getVehicle() != null){
+                MaidVehicleManager.stopControlling(event.getMaid());
             }
     }
 }

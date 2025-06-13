@@ -19,13 +19,14 @@ import net.minecraft.world.item.CompassItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.Config;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.behavior.common.FindTargetMoveBehavior;
 import studio.fantasyit.maid_useful_task.behavior.common.FindTargetWaitBehavior;
+import studio.fantasyit.maid_useful_task.compat.CompatEntry;
+import studio.fantasyit.maid_useful_task.compat.ExplorerCompass;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
         BlockPos target = null;
         ItemStack itemStack = maid.getMainHandItem();
         ItemStack last = MemoryUtil.getLocateItem(maid);
-        if (!last.isEmpty() && !itemStack.isEmpty() && ItemStack.isSameItem(last, itemStack)) {
+        if (!last.isEmpty() && !itemStack.isEmpty() && ItemStack.isSameItemSameTags(last, itemStack)) {
             MemoryUtil.setLocateItem(maid, itemStack);
             MemoryUtil.clearCommonBlockCache(maid);
         }
@@ -149,6 +150,11 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
                 }
             }
         } else {
+            target = CompatEntry.getLocateTarget(maid, maid.getMainHandItem());
+            if (target != null) {
+                MemoryUtil.setCommonBlockCache(maid, target);
+                return target;
+            }
             MemoryUtil.clearCommonBlockCache(maid);
         }
         return target;
