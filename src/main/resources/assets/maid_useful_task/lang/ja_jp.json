@@ -1,0 +1,17 @@
+{
+  "task.maid_useful_task.maid_tree": "木こり",
+  "task.maid_useful_task.maid_tree.desc": "メイは周囲の丸太を切り倒し、苗木を植えます。",
+  "task.maid_useful_task.locate": "位置特定",
+  "task.maid_useful_task.locate.desc": "メイドは特定のアイテムを使って、ある建物やあなたの家の場所を見つけることができます。",
+  "task.maid_useful_task.revive_player": "プレイヤーを復活",
+  "task.maid_useful_task.revive_player.desc": "メイドは近くの出血しているプレイヤーを蘇生させます。",
+  "key.maid_useful_tasks.switch_vehicle_control": "車両制御モードの切り替え",
+  "maid_useful_task.allow_handle_vehicle.none": "メイドコントロール車両を許可しない",
+  "maid_useful_task.allow_handle_vehicle.rot_only": "メイドコントロールの回転のみを許可する",
+  "maid_useful_task.allow_handle_vehicle.full": "メイドによる車両管理を許可する",
+  "key.maid_useful_tasks.categories.main": "メイドの便利な仕事",
+  "gui.maid_useful_task.logging.plant": "苗木を植える",
+  "gui.maid_useful_task.no": "いいえ",
+  "gui.maid_useful_task.yes": "はい",
+  "gui.maid_useful_task.revive.ownerOnly": "所有者のみ復活"
+}
