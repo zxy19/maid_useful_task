@@ -5,8 +5,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
-import java.util.List;
-
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Forge's config APIs
 @Mod.EventBusSubscriber(modid = MaidUsefulTask.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -25,6 +23,9 @@ public class Config {
     private static final ForgeConfigSpec.BooleanValue ENABLE_REVIVE_TOTEM = BUILDER
             .define("revive.totem", true);
 
+    private static final ForgeConfigSpec.BooleanValue LOGGING_DISABLE_BLOCKUP = BUILDER
+            .define("logging.disable_blockup", false);
+
     private static final ForgeConfigSpec.BooleanValue ENABLE_VEHICLE_CONTROL_FULL = BUILDER
             .define("vehicle_control.full", true);
     private static final ForgeConfigSpec.BooleanValue ENABLE_VEHICLE_CONTROL_ROTATE = BUILDER
@@ -41,6 +42,9 @@ public class Config {
 
     public static boolean enableVehicleControlFull = false;
     public static boolean enableVehicleControlRotate = false;
+
+    public static boolean disableLoggingBlockUp = false;
+
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
         enableLoggingTask = ENABLE_LOGGING.get();
@@ -50,5 +54,6 @@ public class Config {
         enableReviveTotem = ENABLE_REVIVE_TOTEM.get();
         enableVehicleControlFull = ENABLE_VEHICLE_CONTROL_FULL.get();
         enableVehicleControlRotate = ENABLE_VEHICLE_CONTROL_ROTATE.get();
+        disableLoggingBlockUp = LOGGING_DISABLE_BLOCKUP.get();
     }
 }

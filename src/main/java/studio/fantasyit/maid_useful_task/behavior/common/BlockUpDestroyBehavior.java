@@ -7,7 +7,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.level.block.state.BlockState;
 import studio.fantasyit.maid_useful_task.memory.BlockUpContext;
 import studio.fantasyit.maid_useful_task.memory.CurrentWork;
 import studio.fantasyit.maid_useful_task.task.IMaidBlockUpTask;
@@ -29,15 +28,15 @@ public class BlockUpDestroyBehavior extends Behavior<EntityMaid> {
     }
 
     public BlockUpDestroyBehavior() {
-        super(Map.of(),500);
+        super(Map.of(), 500);
     }
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid p_22539_) {
-        if(!Conditions.isCurrent(p_22539_, CurrentWork.BLOCKUP_DOWN)) return false;
+        if (!Conditions.isCurrent(p_22539_, CurrentWork.BLOCKUP_DOWN)) return false;
         if (!MemoryUtil.getBlockUpContext(p_22539_).hasTarget()) return false;
         if (MemoryUtil.getBlockUpContext(p_22539_).getStatus() != BlockUpContext.STATUS.DOWN) return false;
-        return Conditions.hasReachedValidTargetOrReset(p_22539_, 0.8f);
+        return true;
     }
 
     @Override
@@ -73,6 +72,7 @@ public class BlockUpDestroyBehavior extends Behavior<EntityMaid> {
             }
         }
     }
+
     @Override
     protected void stop(ServerLevel p_22548_, EntityMaid maid, long p_22550_) {
         super.stop(p_22548_, maid, p_22550_);

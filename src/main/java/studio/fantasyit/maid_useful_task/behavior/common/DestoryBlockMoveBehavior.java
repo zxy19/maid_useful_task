@@ -61,7 +61,7 @@ public class DestoryBlockMoveBehavior extends MaidCenterMoveToBlockTask {
                         if (!PosUtils.isSafePos(serverLevel, pos)) continue;
                         if (!Conditions.isGlobalValidTarget(entityMaid, pos, targetPos)) continue;
                         if (pos.distSqr(targetPos) > task.reachDistance() * task.reachDistance()) continue;
-                        if (entityMaid.isWithinRestriction(pos) && pathfindingBFS.canPathReach(pos)) {
+                        if (pos.equals(entityMaid.blockPosition()) || (entityMaid.isWithinRestriction(pos) && pathfindingBFS.canPathReach(pos))) {
                             blockPosSet = task.toDestroyFromStanding(entityMaid, targetPos, pos);
                             if (blockPosSet != null) {
                                 mb.set(pos);

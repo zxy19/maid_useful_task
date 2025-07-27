@@ -29,7 +29,6 @@ import studio.fantasyit.maid_useful_task.behavior.common.*;
 import studio.fantasyit.maid_useful_task.data.MaidLoggingConfig;
 import studio.fantasyit.maid_useful_task.memory.BlockValidationMemory;
 import studio.fantasyit.maid_useful_task.menu.MaidLoggingConfigGui;
-import studio.fantasyit.maid_useful_task.registry.GuiRegistry;
 import studio.fantasyit.maid_useful_task.util.MaidUtils;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 import studio.fantasyit.maid_useful_task.util.WrappedMaidFakePlayer;
@@ -40,9 +39,11 @@ import java.util.List;
 import java.util.Set;
 
 public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockDestroyTask, IMaidBlockUpTask {
+    public static final ResourceLocation UID = new ResourceLocation(MaidUsefulTask.MODID, "maid_tree");
+
     @Override
     public ResourceLocation getUid() {
-        return new ResourceLocation(MaidUsefulTask.MODID, "maid_tree");
+        return UID;
     }
 
     @Override
@@ -89,7 +90,10 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
             }
         }
         BlockState blockState = maid.level().getBlockState(pos);
-        return blockState.is(BlockTags.LOGS) && isValidNatureTree(maid, pos);
+        if (blockState.is(BlockTags.LOGS)) {
+            return !MaidLoggingConfig.get(maid).skipNonNature() || isValidNatureTree(maid, pos);
+        }
+        return false;
     }
 
     @Override
@@ -247,7 +251,10 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
     public boolean isFindingBlock(EntityMaid maid, BlockPos target, BlockPos standPos) {
         if (target.distSqr(standPos) > touchLimit() * touchLimit())
             return false;
-        return maid.level().getBlockState(target).is(BlockTags.LOGS) && isValidNatureTree(maid, target);
+        if (maid.level().getBlockState(target).is(BlockTags.LOGS)) {
+            return !MaidLoggingConfig.get(maid).skipNonNature() || isValidNatureTree(maid, target);
+        }
+        return false;
     }
 
     @Override
@@ -275,6 +282,7 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
 
     /**
      * 此处判断当home模式未开启时，不允许上搭。
+     *
      * @param maid
      * @param center
      * @param maxUp
@@ -282,7 +290,7 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
      */
     @Override
     public oshi.util.tuples.Pair<BlockPos, BlockPos> findTargetPosBlockUp(EntityMaid maid, BlockPos center, int maxUp) {
-        if (maid.isHomeModeEnable())
+        if (maid.isHomeModeEnable() && MaidLoggingConfig.get(maid).blockUp() && !Config.disableLoggingBlockUp)
             return IMaidBlockUpTask.super.findTargetPosBlockUp(maid, center, maxUp);
         return null;
     }

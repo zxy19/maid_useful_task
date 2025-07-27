@@ -13,6 +13,8 @@ import oshi.util.tuples.Pair;
 import studio.fantasyit.maid_useful_task.util.MaidUtils;
 import studio.fantasyit.maid_useful_task.util.PosUtils;
 
+import java.util.function.Function;
+
 public interface IMaidBlockUpTask {
     default boolean isFindingBlock(EntityMaid maid, BlockPos target, BlockPos standPos) {
         if (target.distSqr(standPos) > touchLimit() * touchLimit())
@@ -41,10 +43,21 @@ public interface IMaidBlockUpTask {
     default Pair<BlockPos, BlockPos> findTargetPosBlockUp(EntityMaid maid, BlockPos center, int maxUp) {
         ServerLevel level = (ServerLevel) maid.level();
         int maxHeight = verticalOffset() + verticalDistance();
-        CenterOffsetBlockPosSet notAvailable = new CenterOffsetBlockPosSet(scanRange(maid), scanRange(maid) + maxHeight / 2 + 1, scanRange(maid), center.getX(), center.getY() + maxHeight / 2, center.getZ());
-        MaidPathFindingBFS pathFindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), level, maid, 7, scanRange(maid));
-        for (int dx = 0; dx < scanRange(maid); dx = dx <= 0 ? 1 - dx : -dx) {
-            for (int dz = 0; dz < scanRange(maid); dz = dz <= 0 ? 1 - dz : -dz) {
+        boolean hasRestriction = maid.hasRestriction();
+        BlockPos restrictCenter = maid.getRestrictCenter();
+        float restrictRadius = maid.getRestrictRadius();
+        int scanRange = scanRange(maid);
+        Function<BlockPos, Boolean> withinRestriction = (BlockPos pos) -> {
+            if (hasRestriction) {
+                return restrictCenter.distSqr(pos) < (double) (restrictRadius * restrictRadius);
+            } else {
+                return true;
+            }
+        };
+        CenterOffsetBlockPosSet notAvailable = new CenterOffsetBlockPosSet(scanRange, scanRange + maxHeight / 2 + 1, scanRange, center.getX(), center.getY() + maxHeight / 2, center.getZ());
+        MaidPathFindingBFS pathFindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), level, maid, 7, scanRange);
+        for (int dx = 0; dx < scanRange; dx = dx <= 0 ? 1 - dx : -dx) {
+            for (int dz = 0; dz < scanRange; dz = dz <= 0 ? 1 - dz : -dz) {
                 //计算地面的位置
                 BlockPos.MutableBlockPos ground = center.offset(dx, 0, dz).mutable();
                 while (level.getBlockState(ground).canBeReplaced()) ground.move(0, -1, 0);
@@ -84,7 +97,7 @@ public interface IMaidBlockUpTask {
                         for (int dy = verticalOffset(); dy < verticalDistance() + verticalOffset(); dy++) {
                             BlockPos targetPos = ground.offset(sdx, dy, sdz);
                             if (targetPos.distSqr(standPos) > touchLimit * touchLimit) break;
-                            if (maid.hasRestriction() && !maid.isWithinRestriction(standPos)) break;
+                            if (hasRestriction && !withinRestriction.apply(standPos)) break;
                             if (isFindingBlock(maid, targetPos, standPos)) {
                                 return new Pair<>(ground.immutable(), standPos);
                             }
@@ -92,7 +105,7 @@ public interface IMaidBlockUpTask {
                             if (continuous) {
                                 if (!level.getBlockState(standPos.above().above()).isAir()) {
                                     continuous = false;
-                                } else if (maid.hasRestriction() && !maid.isWithinRestriction(standPos.above())) {
+                                } else if (hasRestriction && !withinRestriction.apply((standPos.above().above()))) {
                                     continuous = false;
                                 }
                             }

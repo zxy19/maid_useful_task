@@ -8,6 +8,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import studio.fantasyit.maid_useful_task.task.MaidLocateTask;
+import studio.fantasyit.maid_useful_task.task.MaidTreeTask;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
 @Mixin(MaidMoveControl.class)
@@ -18,11 +20,12 @@ abstract public class MaidMoveControlMixin {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void tick(CallbackInfo ci) {
-        if (switch (MemoryUtil.getCurrent(maid)) {
-            case BLOCKUP_DESTROY, BLOCKUP_DOWN -> true;
-            default -> false;
-        }) {
-            ci.cancel();
-        }
+        if (maid.getTask().getUid().equals(MaidTreeTask.UID))
+            if (switch (MemoryUtil.getCurrent(maid)) {
+                case BLOCKUP_DESTROY, BLOCKUP_DOWN -> true;
+                default -> false;
+            }) {
+                ci.cancel();
+            }
     }
 }

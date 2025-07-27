@@ -7,7 +7,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import studio.fantasyit.maid_useful_task.memory.BlockUpContext;
@@ -45,6 +44,7 @@ public class BlockUpPlaceBehavior extends Behavior<EntityMaid> {
     protected boolean canStillUse(ServerLevel p_22545_, EntityMaid maid, long p_22547_) {
         if (MemoryUtil.getBlockUpContext(maid).getStatus() != BlockUpContext.STATUS.UP) return false;
         if (maid.onGround() && !p_22545_.getBlockState(maid.blockPosition().above().above()).isAir()) return false;
+        if (maid.getY() > context.getTargetPos().getY() + 2) return false;
         return !(maid.blockPosition().equals(context.getTargetPos()) && maid.onGround());
     }
 
@@ -60,9 +60,7 @@ public class BlockUpPlaceBehavior extends Behavior<EntityMaid> {
         AABB boundingBox = maid.getBoundingBox();
         BlockPos startPos = context.getStartPos();
         Vec3 move = maid.getDeltaMovement();
-        if (boundingBox.maxX <= startPos.getX() + 1 && boundingBox.maxZ <= startPos.getZ() + 1
-                && boundingBox.minX >= startPos.getX() && boundingBox.minZ >= startPos.getZ()
-        ) {
+        if (boundingBox.maxX <= startPos.getX() + 1 && boundingBox.maxZ <= startPos.getZ() + 1 && boundingBox.minX >= startPos.getX() && boundingBox.minZ >= startPos.getZ()) {
             maid.setDeltaMovement(0, move.y, 0);
             return true;
         }
@@ -80,9 +78,7 @@ public class BlockUpPlaceBehavior extends Behavior<EntityMaid> {
             task.swapValidItemToHand(maid);
             BlockPos pos = maid.blockPosition();
             BlockPos below = pos.below();
-            if (context.isOnLine(pos))
-                if (below.equals(context.getTargetPos()))
-                    return;
+            if (context.isOnLine(pos)) if (below.equals(context.getTargetPos())) return;
             if (level.getBlockState(below).canBeReplaced() && level.getBlockState(pos).canBeReplaced()) {
                 maid.swing(InteractionHand.MAIN_HAND);
                 MaidUtils.placeBlock(maid, below);

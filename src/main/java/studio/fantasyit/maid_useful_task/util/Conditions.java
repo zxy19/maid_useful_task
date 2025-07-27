@@ -8,7 +8,6 @@ import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.phys.Vec3;
 import studio.fantasyit.maid_useful_task.memory.CurrentWork;
-import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
 
 import java.util.Optional;
 
@@ -43,7 +42,7 @@ public class Conditions {
 
     public static boolean isGlobalValidTarget(EntityMaid maid, BlockPos pos, BlockPos targetPos) {
         if (MemoryUtil.getBlockUpContext(maid).hasTarget()) {
-            return MemoryUtil.getBlockUpContext(maid).isTarget(pos);
+            return pos.equals(maid.blockPosition());
         }
         return true;
     }

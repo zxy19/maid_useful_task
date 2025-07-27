@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import studio.fantasyit.maid_useful_task.memory.CurrentWork;
+import studio.fantasyit.maid_useful_task.task.MaidTreeTask;
 import studio.fantasyit.maid_useful_task.util.Conditions;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
@@ -15,8 +16,9 @@ import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 abstract public class MaidRunOneMixin {
     @Inject(method = "tryStart(Lnet/minecraft/server/level/ServerLevel;Lcom/github/tartaricacid/touhoulittlemaid/entity/passive/EntityMaid;J)Z", at = @At("HEAD"), cancellable = true, remap = false)
     public void runOne(ServerLevel pLevel, EntityMaid maid, long pGameTime, CallbackInfoReturnable<Boolean> cir) {
-        if (!Conditions.isCurrent(maid, CurrentWork.IDLE)) {
-            cir.setReturnValue(false);
-        }
+        if (maid.getTask().getUid().equals(MaidTreeTask.UID))
+            if (!Conditions.isCurrent(maid, CurrentWork.IDLE)) {
+                cir.setReturnValue(false);
+            }
     }
 }

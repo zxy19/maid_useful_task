@@ -13,5 +13,7 @@
   "gui.maid_useful_task.logging.plant": "Plant Saplings",
   "gui.maid_useful_task.no": "No",
   "gui.maid_useful_task.yes": "Yes",
-  "gui.maid_useful_task.revive.ownerOnly": "Only revive owner"
+  "gui.maid_useful_task.revive.ownerOnly": "Only revive owner",
+  "gui.maid_useful_task.logging.block_up": "Block Up",
+  "gui.maid_useful_task.logging.skip_non_nature": "Skip Non-nature Logs"
 }
