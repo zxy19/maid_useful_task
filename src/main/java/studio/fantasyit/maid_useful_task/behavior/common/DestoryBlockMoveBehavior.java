@@ -81,9 +81,9 @@ public class DestoryBlockMoveBehavior extends MaidCenterMoveToBlockTask {
     protected @NotNull MaidPathFindingBFS getOrCreateArrivalMap(@NotNull ServerLevel worldIn, @NotNull EntityMaid maid) {
         if (this.pathfindingBFS == null)
             if (maid.hasRestriction())
-                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 14, (int) maid.getRestrictRadius());
+                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, (int) maid.getRestrictRadius(), 7);
             else
-                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 14);
+                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 7, 7);
         return this.pathfindingBFS;
     }
 

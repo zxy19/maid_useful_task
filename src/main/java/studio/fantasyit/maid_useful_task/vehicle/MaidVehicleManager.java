@@ -1,12 +1,11 @@
 package studio.fantasyit.maid_useful_task.vehicle;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.network.PacketDistributor;
 import studio.fantasyit.maid_useful_task.network.MaidSyncVehiclePacket;
 import studio.fantasyit.maid_useful_task.network.Network;
-import studio.fantasyit.maid_useful_task.util.MemoryUtil;
+import studio.fantasyit.maid_useful_task.vehicle.broom.VehicleBroom;
 
 import java.util.ArrayList;
 import java.util.List;
