@@ -20,7 +20,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.items.wrapper.CombinedInvWrapper;
+import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.Config;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockDestroyTask, IMaidBlockUpTask {
-    public static final ResourceLocation UID = new ResourceLocation(MaidUsefulTask.MODID, "maid_tree");
+    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(MaidUsefulTask.MODID, "maid_tree");
 
     @Override
     public ResourceLocation getUid() {

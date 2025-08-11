@@ -1,12 +1,9 @@
 package studio.fantasyit.maid_useful_task.vehicle;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 import studio.fantasyit.maid_useful_task.network.MaidSyncVehiclePacket;
-import studio.fantasyit.maid_useful_task.network.Network;
-import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +31,7 @@ public class MaidVehicleManager {
         getControllableVehicle(maid).ifPresent(vehicle -> {
             CompoundTag syncVehicleParameter = vehicle.getSyncVehicleParameter(maid);
             if (syncVehicleParameter != null) {
-                Network.INSTANCE.send(
-                        PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> maid),
+                PacketDistributor.sendToPlayersTrackingEntity(maid,
                         new MaidSyncVehiclePacket(maid.getId(), syncVehicleParameter)
                 );
             }

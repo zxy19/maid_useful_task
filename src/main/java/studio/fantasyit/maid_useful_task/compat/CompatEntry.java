@@ -3,7 +3,7 @@ package studio.fantasyit.maid_useful_task.compat;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 
 public class CompatEntry {
     public static BlockPos getLocateTarget(EntityMaid maid, ItemStack itemStack) {

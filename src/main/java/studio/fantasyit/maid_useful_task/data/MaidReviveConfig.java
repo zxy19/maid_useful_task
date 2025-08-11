@@ -36,7 +36,7 @@ public class MaidReviveConfig implements TaskDataKey<MaidReviveConfig.Data> {
     }
 
     public static TaskDataKey<Data> KEY = null;
-    public static final ResourceLocation LOCATION = new ResourceLocation(MaidUsefulTask.MODID, "revive");
+    public static final ResourceLocation LOCATION = ResourceLocation.fromNamespaceAndPath(MaidUsefulTask.MODID, "revive");
 
     @Override
     public ResourceLocation getKey() {

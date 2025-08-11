@@ -4,7 +4,6 @@ import com.chaosthedude.naturescompass.NaturesCompass;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.ModList;
 
 public class NatureCompass {
     public static BlockPos getCompassTarget(EntityMaid maid, ItemStack itemStack) {

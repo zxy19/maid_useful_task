@@ -1,36 +1,58 @@
 package studio.fantasyit.maid_useful_task.network;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import net.minecraft.network.FriendlyByteBuf;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.network.NetworkEvent;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import studio.fantasyit.maid_useful_task.Config;
+import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 import studio.fantasyit.maid_useful_task.vehicle.MaidVehicleControlType;
 
-import java.util.function.Supplier;
+public class MaidAllowHandleVehicle implements CustomPacketPayload {
+    public static final CustomPacketPayload.Type<MaidAllowHandleVehicle> TYPE = new CustomPacketPayload.Type<>(
+            ResourceLocation.fromNamespaceAndPath(
+                    MaidUsefulTask.MODID, "allow_handle_vehicle"
+            )
+    );
 
-public class MaidAllowHandleVehicle {
+    @Override
+    public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
+        return TYPE;
+    }
+
     final int maidId;
 
     public MaidAllowHandleVehicle(EntityMaid maid) {
         this.maidId = maid.getId();
     }
 
-    public MaidAllowHandleVehicle(FriendlyByteBuf buffer) {
-        maidId = buffer.readInt();
+    public MaidAllowHandleVehicle(int maidId) {
+        this.maidId = maidId;
     }
 
-    public void toBytes(FriendlyByteBuf buffer) {
-        buffer.writeInt(maidId);
-    }
 
-    public static void handle(MaidAllowHandleVehicle msg, Supplier<NetworkEvent.Context> contextSupplier) {
-        NetworkEvent.Context context = contextSupplier.get();
-        ServerPlayer sender = context.getSender();
+    public static Codec<MaidAllowHandleVehicle> CODEC = RecordCodecBuilder.create(instance ->
+            instance.group(
+                    Codec.INT.fieldOf("maidId").forGetter(packet -> packet.maidId)
+            ).apply(instance, MaidAllowHandleVehicle::new)
+    );
+    public static StreamCodec<ByteBuf, MaidAllowHandleVehicle> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT,
+            t -> t.maidId,
+            MaidAllowHandleVehicle::new
+    );
+
+    public static void handle(MaidAllowHandleVehicle msg, IPayloadContext context) {
+        ServerPlayer sender = (ServerPlayer) context.player();
         Entity entity = sender.level().getEntity(msg.maidId);
         if (entity instanceof EntityMaid maid) {
             MaidVehicleControlType[] values = MaidVehicleControlType.values();

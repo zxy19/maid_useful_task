@@ -1,12 +1,11 @@
 package studio.fantasyit.maid_useful_task.util;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
@@ -17,11 +16,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.items.wrapper.RangedWrapper;
+import net.neoforged.neoforge.items.wrapper.RangedWrapper;
 
-import java.util.UUID;
 import java.util.function.Predicate;
 
 public class MaidUtils {
@@ -55,9 +51,7 @@ public class MaidUtils {
 
     public static boolean destroyBlock(EntityMaid maid, BlockPos blockPos) {
         WrappedMaidFakePlayer fakePlayer = WrappedMaidFakePlayer.get(maid);
-        maid.getMainHandItem().hurtAndBreak(1, fakePlayer, (p_186374_) -> {
-            p_186374_.broadcastBreakEvent(InteractionHand.MAIN_HAND);
-        });
+        maid.getMainHandItem().hurtAndBreak(1, fakePlayer, EquipmentSlot.MAINHAND);
         ServerLevel level = (ServerLevel) maid.level();
         BlockState blockState = level.getBlockState(blockPos);
         if (blockState.isAir()) {

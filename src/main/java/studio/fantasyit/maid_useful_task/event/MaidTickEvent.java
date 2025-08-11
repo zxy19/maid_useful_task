@@ -1,13 +1,13 @@
 package studio.fantasyit.maid_useful_task.event;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.task.IMaidVehicleControlTask;
 import studio.fantasyit.maid_useful_task.vehicle.MaidVehicleManager;
 
-@Mod.EventBusSubscriber(modid = MaidUsefulTask.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = MaidUsefulTask.MODID, bus = EventBusSubscriber.Bus.GAME)
 public class MaidTickEvent {
     @SubscribeEvent
     public static void onTick(com.github.tartaricacid.touhoulittlemaid.api.event.MaidTickEvent event) {
@@ -15,7 +15,7 @@ public class MaidTickEvent {
             if (event.getMaid().getTask() instanceof IMaidVehicleControlTask imvc && event.getMaid().getVehicle() != null) {
                 imvc.tick(sl, event.getMaid());
                 MaidVehicleManager.syncVehicleParameter(event.getMaid());
-            }else if(event.getMaid().getVehicle() != null){
+            } else if (event.getMaid().getVehicle() != null) {
                 MaidVehicleManager.stopControlling(event.getMaid());
             }
     }

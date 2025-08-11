@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MaidRevivePlayerTask implements IMaidTask {
-    public static final ResourceLocation UID = new ResourceLocation(MaidUsefulTask.MODID, "revive_player");
+    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(MaidUsefulTask.MODID, "revive_player");
 
     @Override
     public ResourceLocation getUid() {

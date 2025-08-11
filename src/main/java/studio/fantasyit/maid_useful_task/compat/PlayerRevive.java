@@ -1,6 +1,7 @@
 package studio.fantasyit.maid_useful_task.compat;
 
-import net.minecraftforge.fml.ModList;
+
+import net.neoforged.fml.ModList;
 
 public class PlayerRevive {
     public static boolean isEnable(){

@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.wrapper.CombinedInvWrapper;
+import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
 import oshi.util.tuples.Pair;
 import studio.fantasyit.maid_useful_task.util.MaidUtils;
 import studio.fantasyit.maid_useful_task.util.PosUtils;

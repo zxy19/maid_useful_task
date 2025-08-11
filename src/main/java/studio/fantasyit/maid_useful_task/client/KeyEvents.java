@@ -3,19 +3,18 @@ package studio.fantasyit.maid_useful_task.client;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.network.MaidAllowHandleVehicle;
-import studio.fantasyit.maid_useful_task.network.Network;
-import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
 import static studio.fantasyit.maid_useful_task.client.KeyMapping.KEY_SWITCH_VEHICLE_CONTROL;
 
-@Mod.EventBusSubscriber(modid = MaidUsefulTask.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@EventBusSubscriber(modid = MaidUsefulTask.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
 public class KeyEvents {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
@@ -32,7 +31,7 @@ public class KeyEvents {
                     .findAny()
                     .orElse(null);
             if (maid == null) return;
-            Network.INSTANCE.sendToServer(new MaidAllowHandleVehicle(maid));
+            PacketDistributor.sendToServer(new MaidAllowHandleVehicle(maid));
         }
     }
 }

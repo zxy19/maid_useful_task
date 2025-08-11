@@ -5,8 +5,7 @@ import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,6 +18,9 @@ import net.minecraft.world.item.CompassItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.component.LodestoneTracker;
+import net.minecraft.world.item.component.MapDecorations;
+import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.Config;
@@ -26,14 +28,13 @@ import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.behavior.common.FindTargetMoveBehavior;
 import studio.fantasyit.maid_useful_task.behavior.common.FindTargetWaitBehavior;
 import studio.fantasyit.maid_useful_task.compat.CompatEntry;
-import studio.fantasyit.maid_useful_task.compat.ExplorerCompass;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
-    public static final ResourceLocation UID = new ResourceLocation(MaidUsefulTask.MODID, "locate");
+    public static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(MaidUsefulTask.MODID, "locate");
 
     @Override
     public ResourceLocation getUid() {
@@ -74,7 +75,7 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
         BlockPos target = null;
         ItemStack itemStack = maid.getMainHandItem();
         ItemStack last = MemoryUtil.getLocateItem(maid);
-        if (!last.isEmpty() && !itemStack.isEmpty() && ItemStack.isSameItemSameTags(last, itemStack)) {
+        if (!last.isEmpty() && !itemStack.isEmpty() && ItemStack.isSameItemSameComponents(last, itemStack)) {
             MemoryUtil.setLocateItem(maid, itemStack);
             MemoryUtil.clearCommonBlockCache(maid);
         }
@@ -91,8 +92,9 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
             target = MemoryUtil.getCommonBlockCache(maid);
             if (target == null) {
                 GlobalPos globalPos;
-                if (CompassItem.isLodestoneCompass(itemStack)) {
-                    globalPos = CompassItem.getLodestonePosition(itemStack.getOrCreateTag());
+                LodestoneTracker lodeData = itemStack.get(DataComponents.LODESTONE_TRACKER);
+                if (lodeData != null && lodeData.target().isPresent()) {
+                    globalPos = lodeData.target().get();
                 } else {
                     globalPos = CompassItem.getSpawnPosition(level);
                 }
@@ -127,23 +129,21 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
                 if (savedData != null) {
                     BlockPos.MutableBlockPos tmpTarget = new BlockPos.MutableBlockPos(savedData.centerX, level.getSeaLevel(), savedData.centerZ);
 
-                    CompoundTag tag = itemStack.getOrCreateTag();
                     savedData.getBanners()
                             .stream()
                             .findFirst()
                             .ifPresent(t -> {
-                                tmpTarget.set(t.getPos().immutable());
+                                tmpTarget.set(t.pos().immutable());
                             });
-                    tag.getList("Decorations", Tag.TAG_COMPOUND)
-                            .stream()
-                            .filter(t -> ((CompoundTag) t).getByte("type") == 26)
-                            .findFirst()
-                            .ifPresent(t -> {
-                                CompoundTag decoration = (CompoundTag) t;
-                                tmpTarget.setX(decoration.getInt("x"));
-                                tmpTarget.setZ(decoration.getInt("z"));
-                            });
-
+                    MapDecorations decoList = itemStack.get(DataComponents.MAP_DECORATIONS);
+                    if (decoList != null)
+                        decoList.decorations().entrySet().stream()
+                                .filter(t -> t.getValue().type() == MapDecorationTypes.RED_X)
+                                .findFirst()
+                                .ifPresent(t -> {
+                                    tmpTarget.setX((int) t.getValue().x());
+                                    tmpTarget.setZ((int) t.getValue().z());
+                                });
 
                     target = tmpTarget.immutable();
                     MemoryUtil.setCommonBlockCache(maid, target);

@@ -69,7 +69,7 @@ public class MaidLoggingConfig implements TaskDataKey<MaidLoggingConfig.Data> {
     }
 
     public static TaskDataKey<Data> KEY = null;
-    public static final ResourceLocation LOCATION = new ResourceLocation(MaidUsefulTask.MODID, "logging");
+    public static final ResourceLocation LOCATION = ResourceLocation.fromNamespaceAndPath(MaidUsefulTask.MODID, "logging");
 
     @Override
     public ResourceLocation getKey() {
