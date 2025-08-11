@@ -4,6 +4,8 @@ import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.network.PacketDistributor;
 import studio.fantasyit.maid_useful_task.network.MaidSyncVehiclePacket;
+import studio.fantasyit.maid_useful_task.network.Network;
+import studio.fantasyit.maid_useful_task.vehicle.broom.VehicleBroom;
 
 import java.util.ArrayList;
 import java.util.List;

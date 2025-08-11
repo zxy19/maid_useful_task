@@ -5,6 +5,7 @@ import com.github.tartaricacid.touhoulittlemaid.api.LittleMaidExtension;
 import com.github.tartaricacid.touhoulittlemaid.api.entity.ai.IExtraMaidBrain;
 import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.ExtraMaidBrainManager;
 import com.github.tartaricacid.touhoulittlemaid.entity.data.TaskDataRegister;
+import com.github.tartaricacid.touhoulittlemaid.entity.item.control.BroomControlManager;
 import com.github.tartaricacid.touhoulittlemaid.entity.task.TaskManager;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import studio.fantasyit.maid_useful_task.compat.PlayerRevive;
@@ -15,6 +16,7 @@ import studio.fantasyit.maid_useful_task.registry.MemoryModuleRegistry;
 import studio.fantasyit.maid_useful_task.task.MaidLocateTask;
 import studio.fantasyit.maid_useful_task.task.MaidRevivePlayerTask;
 import studio.fantasyit.maid_useful_task.task.MaidTreeTask;
+import studio.fantasyit.maid_useful_task.vehicle.broom.BroomController;
 
 import java.util.List;
 
@@ -59,5 +61,10 @@ public class UsefulTaskExtension implements ILittleMaid {
         MaidConfigKeys.addKey(MaidReviveConfig.LOCATION,
                 MaidReviveConfig.KEY = register.register(new MaidReviveConfig()),
                 MaidReviveConfig.Data::getDefault);
+    }
+
+    @Override
+    public void registerBroomControl(BroomControlManager register) {
+        register.register(BroomController::new);
     }
 }
