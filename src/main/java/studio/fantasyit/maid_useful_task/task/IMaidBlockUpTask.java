@@ -55,7 +55,7 @@ public interface IMaidBlockUpTask {
             }
         };
         CenterOffsetBlockPosSet notAvailable = new CenterOffsetBlockPosSet(scanRange, scanRange + maxHeight / 2 + 1, scanRange, center.getX(), center.getY() + maxHeight / 2, center.getZ());
-        MaidPathFindingBFS pathFindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), level, maid, 7, scanRange);
+        MaidPathFindingBFS pathFindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), level, maid, 7, scanRange+2);
         for (int dx = 0; dx < scanRange; dx = dx <= 0 ? 1 - dx : -dx) {
             for (int dz = 0; dz < scanRange; dz = dz <= 0 ? 1 - dz : -dz) {
                 //计算地面的位置

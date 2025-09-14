@@ -89,9 +89,9 @@ public class PlaceBlockMoveBehavior extends MaidCenterMoveToBlockTask {
     protected @NotNull MaidPathFindingBFS getOrCreateArrivalMap(@NotNull ServerLevel worldIn, @NotNull EntityMaid maid) {
         if (this.pathfindingBFS == null)
             if (maid.hasRestriction())
-                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, (int) maid.getRestrictRadius(), 7);
+                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, (int) maid.getRestrictRadius(), 9);
             else
-                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 7, 7);
+                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 7, 9);
         return this.pathfindingBFS;
     }
 

@@ -53,6 +53,7 @@ public class DestoryBlockMoveBehavior extends MaidCenterMoveToBlockTask {
     protected boolean shouldMoveTo(@NotNull ServerLevel serverLevel, @NotNull EntityMaid entityMaid, @NotNull BlockPos blockPos) {
         if (!task.shouldDestroyBlock(entityMaid, blockPos.immutable())) return false;
         targetPos = blockPos.immutable();
+        BlockPos startPos = entityMaid.blockPosition();
         if (blockPos instanceof BlockPos.MutableBlockPos mb) {
             for (int dx = 0; dx < task.reachDistance(); dx = dx <= 0 ? 1 - dx : -dx) {
                 for (int dy = 0; dy < task.reachDistance(); dy = dy <= 0 ? 1 - dy : -dy) {
@@ -61,6 +62,9 @@ public class DestoryBlockMoveBehavior extends MaidCenterMoveToBlockTask {
                         if (!PosUtils.isSafePos(serverLevel, pos)) continue;
                         if (!Conditions.isGlobalValidTarget(entityMaid, pos, targetPos)) continue;
                         if (pos.distSqr(targetPos) > task.reachDistance() * task.reachDistance()) continue;
+                        if (Math.abs(startPos.getY() - pos.getY()) >= task.reachDistance()) continue;
+                        if (Math.abs(startPos.getX() - pos.getX()) >= task.reachDistance()) continue;
+                        if (Math.abs(startPos.getZ() - pos.getZ()) >= task.reachDistance()) continue;
                         if (pos.equals(entityMaid.blockPosition()) || (entityMaid.isWithinRestriction(pos) && pathfindingBFS.canPathReach(pos))) {
                             blockPosSet = task.toDestroyFromStanding(entityMaid, targetPos, pos);
                             if (blockPosSet != null) {
@@ -81,9 +85,9 @@ public class DestoryBlockMoveBehavior extends MaidCenterMoveToBlockTask {
     protected @NotNull MaidPathFindingBFS getOrCreateArrivalMap(@NotNull ServerLevel worldIn, @NotNull EntityMaid maid) {
         if (this.pathfindingBFS == null)
             if (maid.hasRestriction())
-                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, (int) maid.getRestrictRadius(), 7);
+                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, (int) maid.getRestrictRadius() + 1, task.reachDistance() + 2);
             else
-                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, 7, 7);
+                this.pathfindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, task.reachDistance() + 1, task.reachDistance() + 2);
         return this.pathfindingBFS;
     }
 

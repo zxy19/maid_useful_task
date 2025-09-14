@@ -184,11 +184,22 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
 
 
     protected boolean isValidNatureTree(EntityMaid maid, BlockPos startPos) {
-        return isValidNatureTree(maid, startPos, new HashSet<>(), 0);
+        HashSet<BlockPos> vis = new HashSet<>();
+        BlockValidationMemory validationMemory = MemoryUtil.getBlockValidationMemory(maid);
+        boolean validNatureTree = isValidNatureTree(maid, startPos, vis, 0, validationMemory);
+        for (BlockPos pos : vis) {
+            BlockState blockState = maid.level().getBlockState(pos);
+            if (!blockState.is(BlockTags.LEAVES) && !blockState.is(BlockTags.LOGS))
+                continue;
+            if (validNatureTree)
+                validationMemory.setValid(pos);
+            else
+                validationMemory.setInvalid(pos);
+        }
+        return validNatureTree;
     }
 
-    protected boolean isValidNatureTree(EntityMaid maid, BlockPos startPos, Set<BlockPos> visited, int depth) {
-        BlockValidationMemory validationMemory = MemoryUtil.getBlockValidationMemory(maid);
+    protected boolean isValidNatureTree(EntityMaid maid, BlockPos startPos, Set<BlockPos> visited, int depth, BlockValidationMemory validationMemory) {
         if (validationMemory.hasRecord(startPos))
             return validationMemory.isValid(startPos, false);
         if (visited.contains(startPos))
@@ -205,7 +216,7 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
                     if (blockState.is(BlockTags.LEAVES) && blockState.hasProperty(LeavesBlock.PERSISTENT) && !blockState.getValue(LeavesBlock.PERSISTENT)) {
                         valid = true;
                     }
-                    if (blockState.is(BlockTags.LOGS) && isValidNatureTree(maid, offset, visited, depth + 1)) {
+                    if (blockState.is(BlockTags.LOGS) && isValidNatureTree(maid, offset, visited, depth + 1, validationMemory)) {
                         valid = true;
                     }
                 }
@@ -221,6 +232,7 @@ public class MaidTreeTask implements IMaidTask, IMaidBlockPlaceTask, IMaidBlockD
     @Override
     public List<Pair<Integer, BehaviorControl<? super EntityMaid>>> createBrainTasks(EntityMaid entityMaid) {
         ArrayList<Pair<Integer, BehaviorControl<? super EntityMaid>>> list = new ArrayList<>();
+        list.add(Pair.of(0, new MaidSelfRescueBehavior()));
 
         list.add(Pair.of(1, new DestoryBlockBehavior()));
         list.add(Pair.of(1, new DestoryBlockMoveBehavior()));

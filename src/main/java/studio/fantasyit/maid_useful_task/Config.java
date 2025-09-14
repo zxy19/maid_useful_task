@@ -11,6 +11,9 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 public class Config {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
+    private static final ForgeConfigSpec.BooleanValue SELF_RESCUE = BUILDER
+            .define("misc.self_rescue", true);
+
     private static final ForgeConfigSpec.BooleanValue ENABLE_LOGGING = BUILDER
             .define("functions.logging", true);
     private static final ForgeConfigSpec.BooleanValue ENABLE_REVIVE = BUILDER
@@ -33,6 +36,8 @@ public class Config {
 
     static final ForgeConfigSpec SPEC = BUILDER.build();
 
+    public static boolean enableSelfRescue = false;
+
     public static boolean enableLoggingTask = false;
     public static boolean enableReviveTask = false;
     public static boolean enableLocateTask = false;
@@ -47,6 +52,7 @@ public class Config {
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
+        enableSelfRescue = SELF_RESCUE.get();
         enableLoggingTask = ENABLE_LOGGING.get();
         enableReviveTask = ENABLE_REVIVE.get();
         enableLocateTask = ENABLE_LOCATE.get();
