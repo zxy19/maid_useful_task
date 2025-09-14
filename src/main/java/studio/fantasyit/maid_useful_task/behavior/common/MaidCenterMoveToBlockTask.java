@@ -1,7 +1,6 @@
 package studio.fantasyit.maid_useful_task.behavior.common;
 
 
-import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.task.MaidCheckRateTask;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.MaidPathFindingBFS;
 import com.github.tartaricacid.touhoulittlemaid.init.InitEntities;
@@ -41,9 +40,11 @@ abstract public class MaidCenterMoveToBlockTask extends Behavior<EntityMaid> {
         this.verticalSearchRange = verticalSearchRange;
         this.searchRange = defaultSearchRange;
     }
+
     public void setSearchRange(int searchRange) {
         this.searchRange = searchRange;
     }
+
     protected final void searchForDestination(ServerLevel worldIn, EntityMaid maid) {
         MaidPathFindingBFS pathFinding = this.getOrCreateArrivalMap(worldIn, maid);
         BlockPos centrePos = this.getWorkSearchPos(maid);
@@ -73,7 +74,7 @@ abstract public class MaidCenterMoveToBlockTask extends Behavior<EntityMaid> {
     }
 
     protected MaidPathFindingBFS getOrCreateArrivalMap(ServerLevel worldIn, EntityMaid maid) {
-        return new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid);
+        return new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), worldIn, maid, maid.searchRadius(), 9);
     }
 
     private BlockPos getWorkSearchPos(EntityMaid maid) {

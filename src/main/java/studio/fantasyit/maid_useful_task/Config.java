@@ -1,6 +1,7 @@
 package studio.fantasyit.maid_useful_task;
 
 
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -11,6 +12,9 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 @EventBusSubscriber(modid = MaidUsefulTask.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+
+    private static final ModConfigSpec.BooleanValue SELF_RESCUE = BUILDER
+            .define("misc.self_rescue", true);
 
     private static final ModConfigSpec.BooleanValue ENABLE_LOGGING = BUILDER
             .define("functions.logging", true);
@@ -34,6 +38,8 @@ public class Config {
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
+    public static boolean enableSelfRescue = false;
+
     public static boolean enableLoggingTask = false;
     public static boolean enableReviveTask = false;
     public static boolean enableLocateTask = false;
@@ -48,6 +54,7 @@ public class Config {
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
+        enableSelfRescue = SELF_RESCUE.get();
         enableLoggingTask = ENABLE_LOGGING.get();
         enableReviveTask = ENABLE_REVIVE.get();
         enableLocateTask = ENABLE_LOCATE.get();

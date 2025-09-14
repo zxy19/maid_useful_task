@@ -53,7 +53,7 @@ public class DestoryBlockBehavior extends Behavior<EntityMaid> {
         BlockTargetMemory blockTargetMemory = MemoryUtil.getDestroyTargetMemory(maid);
         if (blockTargetMemory != null) {
             blockPosSet = new ArrayList<>(blockTargetMemory.getBlockPosSet());
-            blockPosSet.sort((o1, o2) -> (int) (o1.distSqr(maid.blockPosition()) - o2.distSqr(maid.blockPosition())));
+            blockPosSet.sort((o1, o2) -> (int) (o1.distSqr(maid.blockPosition().above()) - o2.distSqr(maid.blockPosition().above())));
         }
         index = 0;
         task = (IMaidBlockDestroyTask) maid.getTask();
@@ -65,6 +65,8 @@ public class DestoryBlockBehavior extends Behavior<EntityMaid> {
 
     @Override
     protected boolean canStillUse(ServerLevel p_22545_, EntityMaid p_22546_, long p_22547_) {
+        if (MemoryUtil.getCurrent(p_22546_) != CurrentWork.DESTROY && MemoryUtil.getCurrent(p_22546_) != CurrentWork.BLOCKUP_DESTROY)
+            return false;
         return (blockPosSet != null && index < blockPosSet.size()) || targetPos != null;
     }
 
