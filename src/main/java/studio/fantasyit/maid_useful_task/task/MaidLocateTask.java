@@ -22,9 +22,11 @@ import net.minecraft.world.item.component.LodestoneTracker;
 import net.minecraft.world.item.component.MapDecorations;
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraftforge.common.MinecraftForge;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.Config;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
+import studio.fantasyit.maid_useful_task.api.ItemLocateEvent;
 import studio.fantasyit.maid_useful_task.behavior.common.FindTargetMoveBehavior;
 import studio.fantasyit.maid_useful_task.behavior.common.FindTargetWaitBehavior;
 import studio.fantasyit.maid_useful_task.compat.CompatEntry;
@@ -79,7 +81,10 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
             MemoryUtil.setLocateItem(maid, itemStack);
             MemoryUtil.clearCommonBlockCache(maid);
         }
-        if (maid.getMainHandItem().is(Items.ENDER_EYE)) {
+        ItemLocateEvent event = new ItemLocateEvent(itemStack, maid, MemoryUtil.getCommonBlockCache(maid));
+        if (MinecraftForge.EVENT_BUS.post(event)) {
+            target = event.getTarget();
+        } else if (maid.getMainHandItem().is(Items.ENDER_EYE)) {
             target = MemoryUtil.getCommonBlockCache(maid);
             if (target == null) {
                 BlockPos blockpos = level.findNearestMapStructure(StructureTags.EYE_OF_ENDER_LOCATED, maid.blockPosition(), 100, false);
