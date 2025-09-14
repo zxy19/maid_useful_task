@@ -73,20 +73,20 @@ side="BOTH"
 # Here's another dependency
 [[dependencies."${mod_id}"]]
 modId="minecraft"
-mandatory=true
+type="required" #mandatory
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
 [[dependencies."${mod_id}"]]
 modId="touhou_little_maid"
-mandatory=true
+type="required" #mandatory
 versionRange="[1.3.7,)"
 ordering="AFTER"
 side="BOTH"
 [[dependencies."${mod_id}"]]
 modId="playerrevive"
-mandatory=false
+type="optional" #mandatory
 versionRange="[2.0.16,)"
 ordering="AFTER"
 side="BOTH"

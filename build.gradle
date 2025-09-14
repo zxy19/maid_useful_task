@@ -112,7 +112,7 @@ dependencies {
     compileOnly "curse.maven:creativecore-257814:6690762"
     compileOnly "curse.maven:natures-compass-252848:5696042"
     compileOnly "curse.maven:explorers-compass-491794:5756947"
-    runtimeOnly "curse.maven:playerrevive-266890:6383797"
+//    runtimeOnly "curse.maven:playerrevive-266890:6383797"
     runtimeOnly "curse.maven:creativecore-257814:6690762"
 //    runtimeOnly "curse.maven:natures-compass-252848:5696042"
 //    runtimeOnly "curse.maven:explorers-compass-491794:5756947"
