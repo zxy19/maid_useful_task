@@ -1,7 +1,6 @@
 package studio.fantasyit.maid_useful_task;
 
 
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
