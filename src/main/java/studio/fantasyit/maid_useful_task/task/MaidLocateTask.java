@@ -22,7 +22,7 @@ import net.minecraft.world.item.component.LodestoneTracker;
 import net.minecraft.world.item.component.MapDecorations;
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 import studio.fantasyit.maid_useful_task.Config;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
@@ -82,7 +82,8 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
             MemoryUtil.clearCommonBlockCache(maid);
         }
         ItemLocateEvent event = new ItemLocateEvent(itemStack, maid, MemoryUtil.getCommonBlockCache(maid));
-        if (MinecraftForge.EVENT_BUS.post(event)) {
+        ItemLocateEvent posted = NeoForge.EVENT_BUS.post(event);
+        if (posted.isCanceled()) {
             target = event.getTarget();
         } else if (maid.getMainHandItem().is(Items.ENDER_EYE)) {
             target = MemoryUtil.getCommonBlockCache(maid);
