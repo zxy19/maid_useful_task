@@ -24,7 +24,10 @@ import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
 import studio.fantasyit.maid_useful_task.Config;
 import studio.fantasyit.maid_useful_task.data.MaidReviveConfig;
+import studio.fantasyit.maid_useful_task.data.MaidReviveGlobalData;
+import studio.fantasyit.maid_useful_task.task.MaidRevivePlayerTask;
 import studio.fantasyit.maid_useful_task.util.InvUtil;
+import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 import studio.fantasyit.maid_useful_task.util.WrappedMaidFakePlayer;
 import team.creative.playerrevive.PlayerRevive;
 import team.creative.playerrevive.api.IBleeding;
@@ -63,9 +66,19 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid maid) {
+        if (!maid.getTask().getUid().equals(MaidRevivePlayerTask.UID)) {
+            // 如果来自被动行为，那么确保不打断现有的巡路逻辑
+            if (MemoryUtil.getTargetPos(maid) != null || maid.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET))
+                return false;
+        }
+
+        if (!itemConsumeCheck(maid, true))
+            return false;
         Optional<NearestVisibleLivingEntities> memory = maid.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
         return memory.map(list -> list
                 .find(entity -> entity instanceof Player)
+                //TODO 优先级判别和替代救援机制
+                .filter(ep -> !MaidReviveGlobalData.hasRescuingMaid(ep.getUUID()))
                 .map(ep -> PlayerReviveServer.getBleeding((ServerPlayer) ep))
                 .anyMatch(IBleeding::isBleeding)
         ).orElse(false);
@@ -76,24 +89,42 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
     boolean startedRevive;
     Set<UUID> aggroEntities;
 
+    protected boolean itemConsumeCheck(EntityMaid maid, boolean simulate) {
+        if (!PlayerRevive.CONFIG.revive.needReviveItem)
+            return true;
+
+        ItemStack extractedForConsume = InvUtil.tryExtractOneMatches(maid.getAvailableInv(true), PlayerRevive.CONFIG.revive.reviveItem::is, simulate);
+        return PlayerRevive.CONFIG.revive.reviveItem.is(extractedForConsume);
+    }
+
     @Override
     protected void start(ServerLevel level, EntityMaid maid, long p_22542_) {
         super.start(level, maid, p_22542_);
         aggroEntities = new HashSet<>();
         startedRevive = false;
-        boolean ownerOnly = maid.getOrCreateData(MaidReviveConfig.KEY, MaidReviveConfig.Data.getDefault()).ownerOnly();
+        targetPlayer = null;
+        boolean ownerOnly;
+        if (maid.getTask().getUid().equals(MaidRevivePlayerTask.UID))
+            ownerOnly = maid.getOrCreateData(MaidReviveConfig.KEY, MaidReviveConfig.Data.getDefault()).ownerOnly();
+        else {
+            ownerOnly = false;
+        }
         LivingEntity owner = maid.getOwner();
         Optional<NearestVisibleLivingEntities> memory = maid.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
+        if (!itemConsumeCheck(maid, true))
+            return;
         targetPlayer = memory.flatMap(list -> list
                 .find(entity -> entity instanceof Player)
                 .map(ep -> (ServerPlayer) ep)
+                //TODO 优先级判别和替代救援机制
+                .filter(sp -> !MaidReviveGlobalData.checkRescuingMaid(sp.getUUID(), (ServerLevel) sp.level()))
                 .filter(sp -> (owner != null && sp.is(owner)) || !ownerOnly)
                 .filter(ep -> PlayerReviveServer.getBleeding(ep).isBleeding())
                 .findFirst()
         ).orElse(null);
         if (targetPlayer != null) {
             bleeding = PlayerReviveServer.getBleeding(targetPlayer);
-            BehaviorUtils.setWalkAndLookTargetMemories(maid, targetPlayer, 0.5f, 2);
+            MemoryUtil.setTargetEntity(maid, targetPlayer, 0.5f);
         }
         useTotemOfUndying(level, maid);
     }
@@ -119,8 +150,7 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
     private void checkCanReviveAndStartRevive(ServerLevel level, EntityMaid maid) {
         if (PlayerRevive.CONFIG.revive.needReviveItem) {
             if (PlayerRevive.CONFIG.revive.consumeReviveItem && !bleeding.isItemConsumed()) {
-                ItemStack extractedForConsume = InvUtil.tryExtractOneMatches(maid.getAvailableInv(true), PlayerRevive.CONFIG.revive.reviveItem::is);
-                if (!PlayerRevive.CONFIG.revive.reviveItem.is(extractedForConsume)) {
+                if (!itemConsumeCheck(maid, false)) {
                     targetPlayer = null;
                     return;
                 }
@@ -132,12 +162,16 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
         PlayerReviveServer.removePlayerAsHelper(WrappedMaidFakePlayer.get(maid));
         bleeding.revivingPlayers().add(WrappedMaidFakePlayer.get(maid));
         aggroEntitiesAround(level, maid);
+        if (MaidReviveGlobalData.hasRescuingMaid(targetPlayer.getUUID())) {
+            //TODO 接力救援
+        }
+        MaidReviveGlobalData.setRescuingMaid(targetPlayer.getUUID(), maid.getUUID());
     }
 
     @Override
     protected boolean canStillUse(ServerLevel p_22545_, EntityMaid maid, long p_22547_) {
         if (targetPlayer == null) return false;
-        if (targetPlayer.distanceTo(maid) > PlayerRevive.CONFIG.revive.maxDistance) return false;
+        if (startedRevive && targetPlayer.distanceTo(maid) > PlayerRevive.CONFIG.revive.maxDistance) return false;
         return bleeding.isBleeding();
     }
 
@@ -161,6 +195,11 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
         if (p_22553_ % 20 == 0)
             BehaviorUtils.setWalkAndLookTargetMemories(maid, targetPlayer, 0.5f, 2);
         if (!startedRevive) {
+            if (MaidReviveGlobalData.hasRescuingMaid(targetPlayer.getUUID())) {
+                //TODO 检查优先级
+                targetPlayer = null;
+                return;
+            }
             if (maid.distanceTo(targetPlayer) < PlayerRevive.CONFIG.revive.maxDistance) {
                 checkCanReviveAndStartRevive(level, maid);
                 startedRevive = true;
@@ -173,6 +212,9 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
 
     @Override
     protected void stop(ServerLevel p_22548_, EntityMaid maid, long p_22550_) {
+        if (targetPlayer != null)
+            MaidReviveGlobalData.clearRescuingMaid(targetPlayer.getUUID());
+        MemoryUtil.clearTarget(maid);
         PlayerReviveServer.removePlayerAsHelper(WrappedMaidFakePlayer.get(maid));
         for (UUID uuid : aggroEntities) {
             Entity entity = p_22548_.getEntity(uuid);
