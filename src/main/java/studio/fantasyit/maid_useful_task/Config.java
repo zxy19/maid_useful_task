@@ -25,6 +25,8 @@ public class Config {
             .define("revive.aggro", false);
     private static final ForgeConfigSpec.BooleanValue ENABLE_REVIVE_TOTEM = BUILDER
             .define("revive.totem", true);
+    private static final ForgeConfigSpec.BooleanValue ENABLE_REVIVE_PASSIVE = BUILDER
+            .define("revive.passive", true);
 
     private static final ForgeConfigSpec.BooleanValue LOGGING_DISABLE_BLOCKUP = BUILDER
             .define("logging.disable_blockup", false);
@@ -44,6 +46,7 @@ public class Config {
 
     public static boolean enableReviveAggro = false;
     public static boolean enableReviveTotem = false;
+    public static boolean enableRevivePassive = false;
 
     public static boolean enableVehicleControlFull = false;
     public static boolean enableVehicleControlRotate = false;
@@ -58,6 +61,7 @@ public class Config {
         enableLocateTask = ENABLE_LOCATE.get();
         enableReviveAggro = ENABLE_REVIVE_AGGRO.get();
         enableReviveTotem = ENABLE_REVIVE_TOTEM.get();
+        enableRevivePassive = ENABLE_REVIVE_PASSIVE.get();
         enableVehicleControlFull = ENABLE_VEHICLE_CONTROL_FULL.get();
         enableVehicleControlRotate = ENABLE_VEHICLE_CONTROL_ROTATE.get();
         disableLoggingBlockUp = LOGGING_DISABLE_BLOCKUP.get();

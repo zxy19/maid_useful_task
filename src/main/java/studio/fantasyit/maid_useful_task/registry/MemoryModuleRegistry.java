@@ -13,6 +13,7 @@ import studio.fantasyit.maid_useful_task.util.WrappedMaidFakePlayer;
 import studio.fantasyit.maid_useful_task.vehicle.MaidVehicleControlType;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class MemoryModuleRegistry {
     public static final DeferredRegister<MemoryModuleType<?>> REGISTER
@@ -27,6 +28,8 @@ public class MemoryModuleRegistry {
             = REGISTER.register("block_validation", () -> new MemoryModuleType<>(Optional.of(BlockValidationMemory.CODEC)));
     public static final RegistryObject<MemoryModuleType<BlockPos>> COMMON_BLOCK_CACHE
             = REGISTER.register("common_block_cache", () -> new MemoryModuleType<>(Optional.empty()));
+    public static final RegistryObject<MemoryModuleType<UUID>> REVIVING_PLAYER
+            = REGISTER.register("reviving_player", () -> new MemoryModuleType<>(Optional.empty()));
     public static final RegistryObject<MemoryModuleType<ItemStack>> LOCATE_ITEM = REGISTER.register("locate_item", () -> new MemoryModuleType<>(Optional.empty()));
     public static final RegistryObject<MemoryModuleType<CurrentWork>> CURRENT_WORK = REGISTER.register("current_work", () -> new MemoryModuleType<>(Optional.empty()));
     public static final RegistryObject<MemoryModuleType<MaidVehicleControlType>> IS_ALLOW_HANDLE_VEHICLE = REGISTER.register("is_allow_handle_vehicle", () -> new MemoryModuleType<>(Optional.empty()));

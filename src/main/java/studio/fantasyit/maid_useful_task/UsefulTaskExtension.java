@@ -6,8 +6,12 @@ import com.github.tartaricacid.touhoulittlemaid.api.entity.ai.IExtraMaidBrain;
 import com.github.tartaricacid.touhoulittlemaid.entity.ai.brain.ExtraMaidBrainManager;
 import com.github.tartaricacid.touhoulittlemaid.entity.data.TaskDataRegister;
 import com.github.tartaricacid.touhoulittlemaid.entity.item.control.BroomControlManager;
+import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.entity.task.TaskManager;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.world.entity.ai.behavior.BehaviorControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import studio.fantasyit.maid_useful_task.behavior.PlayerReviveBehavior;
 import studio.fantasyit.maid_useful_task.compat.PlayerRevive;
 import studio.fantasyit.maid_useful_task.data.MaidConfigKeys;
 import studio.fantasyit.maid_useful_task.data.MaidLoggingConfig;
@@ -18,6 +22,7 @@ import studio.fantasyit.maid_useful_task.task.MaidRevivePlayerTask;
 import studio.fantasyit.maid_useful_task.task.MaidTreeTask;
 import studio.fantasyit.maid_useful_task.vehicle.broom.BroomController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @LittleMaidExtension
@@ -49,6 +54,14 @@ public class UsefulTaskExtension implements ILittleMaid {
                         MemoryModuleRegistry.IS_ALLOW_HANDLE_VEHICLE.get(),
                         MemoryModuleRegistry.LOCATE_ITEM.get()
                 );
+            }
+
+            @Override
+            public List<Pair<Integer, BehaviorControl<? super EntityMaid>>> getCoreBehaviors() {
+                List<Pair<Integer, BehaviorControl<? super EntityMaid>>> list = new ArrayList<>();
+                if(Config.enableRevivePassive)
+                    list.add(Pair.of(0, new PlayerReviveBehavior()));
+                return list;
             }
         });
     }

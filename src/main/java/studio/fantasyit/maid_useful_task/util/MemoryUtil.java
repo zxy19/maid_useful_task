@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
+import net.minecraft.world.entity.ai.behavior.EntityTracker;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.item.ItemStack;
@@ -75,6 +76,10 @@ public class MemoryUtil {
         return brain.getMemory(MemoryModuleRegistry.BLOCK_VALIDATION.get()).get();
     }
 
+    public static void setTargetEntity(EntityMaid maid, Entity target, float speed) {
+        maid.getBrain().setMemory(InitEntities.TARGET_POS.get(), new EntityTracker(target,false));
+        BehaviorUtils.setWalkAndLookTargetMemories(maid, target, speed, 0);
+    }
     public static void setTarget(EntityMaid maid, BlockPos targetPos, float speed) {
         maid.getBrain().setMemory(InitEntities.TARGET_POS.get(), new BlockPosTracker(targetPos));
         BehaviorUtils.setWalkAndLookTargetMemories(maid, targetPos, speed, 0);
