@@ -35,8 +35,7 @@ import studio.fantasyit.maid_useful_task.vehicle.MaidVehicleManager;
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(MaidUsefulTask.MODID)
 public class MaidUsefulTask {
-
-    // Define mod id in a common place for everything to reference
+    public static final Logger logger = LogUtils.getLogger();
     public static final String MODID = "maid_useful_task";
 
     @SuppressWarnings("removal")
