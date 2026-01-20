@@ -1,6 +1,7 @@
 package studio.fantasyit.maid_useful_task.behavior;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
+import com.github.tartaricacid.touhoulittlemaid.entity.passive.MaidPathFindingBFS;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -65,7 +66,7 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
     }
 
     @Override
-    protected boolean checkExtraStartConditions(ServerLevel p_22538_, EntityMaid maid) {
+    protected boolean checkExtraStartConditions(ServerLevel level, EntityMaid maid) {
         if (!maid.getTask().getUid().equals(MaidRevivePlayerTask.UID)) {
             // 如果来自被动行为，那么确保不打断现有的巡路逻辑
             if (MemoryUtil.getTargetPos(maid) != null || maid.getBrain().hasMemoryValue(MemoryModuleType.WALK_TARGET))
@@ -74,13 +75,12 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
 
         if (!itemConsumeCheck(maid, true))
             return false;
+        MaidPathFindingBFS pathFindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), level, maid);
         Optional<NearestVisibleLivingEntities> memory = maid.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
         return memory.map(list -> list
                 .find(entity -> entity instanceof Player)
-                //TODO 优先级判别和替代救援机制
-                .filter(ep -> !MaidReviveGlobalData.hasRescuingMaid(ep.getUUID()))
-                .map(ep -> PlayerReviveServer.getBleeding((ServerPlayer) ep))
-                .anyMatch(IBleeding::isBleeding)
+                .filter(ep -> MaidReviveGlobalData.checkRescuingMaid(ep.getUUID(), maid, level))
+                .anyMatch(ep -> PlayerReviveServer.getBleeding((ServerPlayer) ep).isBleeding() && pathFindingBFS.canPathReach(ep.blockPosition()))
         ).orElse(false);
     }
 
@@ -113,18 +113,20 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
         Optional<NearestVisibleLivingEntities> memory = maid.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES);
         if (!itemConsumeCheck(maid, true))
             return;
+        MaidPathFindingBFS pathFindingBFS = new MaidPathFindingBFS(maid.getNavigation().getNodeEvaluator(), level, maid);
         targetPlayer = memory.flatMap(list -> list
                 .find(entity -> entity instanceof Player)
                 .map(ep -> (ServerPlayer) ep)
-                //TODO 优先级判别和替代救援机制
-                .filter(sp -> !MaidReviveGlobalData.checkRescuingMaid(sp.getUUID(), (ServerLevel) sp.level()))
+                .filter(sp -> MaidReviveGlobalData.checkRescuingMaid(sp.getUUID(), maid, (ServerLevel) sp.level()))
                 .filter(sp -> (owner != null && sp.is(owner)) || !ownerOnly)
                 .filter(ep -> PlayerReviveServer.getBleeding(ep).isBleeding())
+                .filter(ep -> pathFindingBFS.canPathReach(ep.blockPosition()))
                 .findFirst()
         ).orElse(null);
         if (targetPlayer != null) {
             bleeding = PlayerReviveServer.getBleeding(targetPlayer);
             MemoryUtil.setTargetEntity(maid, targetPlayer, 0.5f);
+            MaidReviveGlobalData.setRescuingMaid(targetPlayer.getUUID(), maid.getUUID());
         }
         useTotemOfUndying(level, maid);
     }
@@ -160,12 +162,9 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
         }
 
         PlayerReviveServer.removePlayerAsHelper(WrappedMaidFakePlayer.get(maid));
+        MaidReviveGlobalData.startRescue(targetPlayer.getUUID());
         bleeding.revivingPlayers().add(WrappedMaidFakePlayer.get(maid));
         aggroEntitiesAround(level, maid);
-        if (MaidReviveGlobalData.hasRescuingMaid(targetPlayer.getUUID())) {
-            //TODO 接力救援
-        }
-        MaidReviveGlobalData.setRescuingMaid(targetPlayer.getUUID(), maid.getUUID());
     }
 
     @Override
@@ -195,8 +194,7 @@ public class PlayerReviveBehavior extends Behavior<EntityMaid> {
         if (p_22553_ % 20 == 0)
             BehaviorUtils.setWalkAndLookTargetMemories(maid, targetPlayer, 0.5f, 2);
         if (!startedRevive) {
-            if (MaidReviveGlobalData.hasRescuingMaid(targetPlayer.getUUID())) {
-                //TODO 检查优先级
+            if (MaidReviveGlobalData.isBeingRescueByOtherMaid(targetPlayer.getUUID(), maid.getUUID())) {
                 targetPlayer = null;
                 return;
             }

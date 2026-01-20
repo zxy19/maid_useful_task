@@ -1,10 +1,14 @@
 package studio.fantasyit.maid_useful_task;
 
-
+import com.github.tartaricacid.touhoulittlemaid.entity.task.*;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
+
+import java.util.HashMap;
+import java.util.List;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Forge's config APIs
@@ -26,8 +30,23 @@ public class Config {
             .define("revive.aggro", false);
     private static final ModConfigSpec.BooleanValue ENABLE_REVIVE_TOTEM = BUILDER
             .define("revive.totem", true);
-    private static final ForgeConfigSpec.BooleanValue ENABLE_REVIVE_PASSIVE = BUILDER
+    private static final ModConfigSpec.BooleanValue ENABLE_REVIVE_PASSIVE = BUILDER
             .define("revive.passive", true);
+    private static final ModConfigSpec.ConfigValue<List<?>> REVIVE_PASSIVE_PRIORITY_1 = BUILDER
+            .defineList("revive.passive_priority.1", List.of(
+                    TaskIdle.UID.toString()
+            ), t -> t instanceof String);
+    private static final ModConfigSpec.ConfigValue<List<?>> REVIVE_PASSIVE_PRIORITY_2 = BUILDER
+            .defineList("revive.passive_priority.2", List.of(), t -> t instanceof String);
+    private static final ModConfigSpec.ConfigValue<List<?>> REVIVE_PASSIVE_PRIORITY_4 = BUILDER
+            .defineList("revive.passive_priority.4", List.of(
+                    TaskAttack.UID.toString(),
+                    TaskBowAttack.UID.toString(),
+                    TaskCrossBowAttack.UID.toString(),
+                    TaskDanmakuAttack.UID.toString(),
+                    TaskTridentAttack.UID.toString()
+            ), t -> t instanceof String);
+
 
     private static final ModConfigSpec.BooleanValue LOGGING_DISABLE_BLOCKUP = BUILDER
             .define("logging.disable_blockup", false);
@@ -54,6 +73,8 @@ public class Config {
 
     public static boolean disableLoggingBlockUp = false;
 
+    public static HashMap<ResourceLocation, Integer> passiveReviveJobPriority = new HashMap<>();
+
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
         enableSelfRescue = SELF_RESCUE.get();
@@ -66,5 +87,25 @@ public class Config {
         enableVehicleControlFull = ENABLE_VEHICLE_CONTROL_FULL.get();
         enableVehicleControlRotate = ENABLE_VEHICLE_CONTROL_ROTATE.get();
         disableLoggingBlockUp = LOGGING_DISABLE_BLOCKUP.get();
+
+        passiveReviveJobPriority.clear();
+        setPriority(REVIVE_PASSIVE_PRIORITY_1.get(), 1);
+        setPriority(REVIVE_PASSIVE_PRIORITY_2.get(), 2);
+        setPriority(REVIVE_PASSIVE_PRIORITY_4.get(), 4);
+    }
+
+    private static void setPriority(List<?> list, int priority) {
+        for (Object op1 : list) {
+            if (op1 instanceof String sp1) {
+                try {
+                    ResourceLocation rl = ResourceLocation.tryParse(sp1);
+                    passiveReviveJobPriority.put(rl, priority);
+                } catch (Exception e) {
+                    MaidUsefulTask.logger.error("When parsing level " + priority + " rl: " + sp1);
+                }
+            } else {
+                MaidUsefulTask.logger.error("not a string: " + op1.toString());
+            }
+        }
     }
 }
