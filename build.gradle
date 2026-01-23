@@ -3,6 +3,25 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.89'
+    id "me.modmuss50.mod-publish-plugin" version "1.1.0"
+}
+
+publishMods {
+    type = BETA
+    file = jar.archiveFile
+    modLoaders.add("neoforge")
+    changelog = file("changelog").text
+
+    curseforge {
+        projectId = "1255424"
+        accessToken = CURSEFORGE_TOKEN
+        minecraftVersions.add("1.21.1")
+    }
+    modrinth {
+        projectId = "J8yr3TFW"
+        accessToken = MODRINTH_TOKEN
+        minecraftVersions.add("1.21.1")
+    }
 }
 tasks.named('wrapper', Wrapper).configure {
     // Define wrapper values here so as to not have to always do so when updating gradlew.properties.
