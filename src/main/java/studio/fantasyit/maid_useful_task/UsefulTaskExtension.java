@@ -59,8 +59,10 @@ public class UsefulTaskExtension implements ILittleMaid {
             @Override
             public List<Pair<Integer, BehaviorControl<? super EntityMaid>>> getCoreBehaviors() {
                 List<Pair<Integer, BehaviorControl<? super EntityMaid>>> list = new ArrayList<>();
-                if(Config.enableRevivePassive)
-                    list.add(Pair.of(0, new PlayerReviveBehavior()));
+                if (Config.enableRevivePassive)
+                    if (Config.enableReviveTask)
+                        if (PlayerRevive.isEnable())
+                            list.add(Pair.of(0, new PlayerReviveBehavior()));
                 return list;
             }
         });
