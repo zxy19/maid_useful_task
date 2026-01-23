@@ -13,6 +13,25 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+    id "me.modmuss50.mod-publish-plugin" version "1.1.0"
+}
+
+publishMods {
+    type = BETA
+    file = jar.archiveFile
+    modLoaders.add("forge")
+    changelog = file("changelog").text
+
+    curseforge {
+        projectId = "1255424"
+        accessToken = CURSEFORGE_TOKEN
+        minecraftVersions.add("1.20.1")
+    }
+    modrinth {
+        projectId = "J8yr3TFW"
+        accessToken = MODRINTH_TOKEN
+        minecraftVersions.add("1.20.1")
+    }
 }
 
 apply plugin: 'org.spongepowered.mixin'
