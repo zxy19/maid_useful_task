@@ -60,8 +60,10 @@ public interface IMaidBlockUpTask {
             for (int dz = 0; dz < scanRange; dz = dz <= 0 ? 1 - dz : -dz) {
                 //计算地面的位置
                 BlockPos.MutableBlockPos ground = center.offset(dx, 0, dz).mutable();
-                while (level.getBlockState(ground).canBeReplaced()) ground.move(0, -1, 0);
-                while (!level.getBlockState(ground).canBeReplaced()) ground.move(0, 1, 0);
+                while (level.getBlockState(ground).canBeReplaced() && ground.getY() > level.getMinBuildHeight()) ground.move(0, -1, 0);
+                if(ground.getY() <= level.getMinBuildHeight()) continue;
+                while (!level.getBlockState(ground).canBeReplaced() && ground.getY() < level.getMaxBuildHeight()) ground.move(0, 1, 0);
+                if(ground.getY() >= level.getMinBuildHeight()) continue;
                 if (notAvailable.isVis(ground)) continue;
                 //地面基本判断
                 if (!PosUtils.isSafePos(level, ground)) continue;
