@@ -1,1 +1,1 @@
-Fix logging blockup for void world
+Fix the logical bug in block up predication

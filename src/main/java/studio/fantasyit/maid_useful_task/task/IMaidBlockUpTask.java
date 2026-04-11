@@ -63,7 +63,7 @@ public interface IMaidBlockUpTask {
                 while (level.getBlockState(ground).canBeReplaced() && ground.getY() > level.getMinBuildHeight()) ground.move(0, -1, 0);
                 if(ground.getY() <= level.getMinBuildHeight()) continue;
                 while (!level.getBlockState(ground).canBeReplaced() && ground.getY() < level.getMaxBuildHeight()) ground.move(0, 1, 0);
-                if(ground.getY() >= level.getMinBuildHeight()) continue;
+                if(ground.getY() >= level.getMaxBuildHeight()) continue;
                 if (notAvailable.isVis(ground)) continue;
                 //地面基本判断
                 if (!PosUtils.isSafePos(level, ground)) continue;
