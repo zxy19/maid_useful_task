@@ -7,8 +7,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Forge's config APIs
@@ -73,7 +74,11 @@ public class Config {
 
     public static boolean disableLoggingBlockUp = false;
 
-    public static HashMap<ResourceLocation, Integer> passiveReviveJobPriority = new HashMap<>();
+    /**
+     * 配置加载发生在 MOD 事件总线（可能非服务端线程），而读取发生在服务端线程，
+     * 因此使用并发容器；同时丢弃解析失败的非法资源名，避免写入 null 键。
+     */
+    public static Map<ResourceLocation, Integer> passiveReviveJobPriority = new ConcurrentHashMap<>();
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
@@ -99,6 +104,10 @@ public class Config {
             if (op1 instanceof String sp1) {
                 try {
                     ResourceLocation rl = ResourceLocation.tryParse(sp1);
+                    if (rl == null) {
+                        MaidUsefulTask.logger.error("Invalid resource location at level " + priority + ": " + sp1);
+                        continue;
+                    }
                     passiveReviveJobPriority.put(rl, priority);
                 } catch (Exception e) {
                     MaidUsefulTask.logger.error("When parsing level " + priority + " rl: " + sp1);
