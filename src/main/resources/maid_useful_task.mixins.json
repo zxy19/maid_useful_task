@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "studio.fantasyit.maid_useful_task.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_17",
   "refmap": "maid_useful_task.refmap.json",
   "mixins": [
     "FollowMaidMixin",
