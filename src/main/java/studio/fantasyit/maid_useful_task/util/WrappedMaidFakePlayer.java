@@ -3,23 +3,15 @@ package studio.fantasyit.maid_useful_task.util;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -27,8 +19,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.items.wrapper.CombinedInvWrapper;
-import net.minecraftforge.items.wrapper.PlayerInvWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 
 public class WrappedMaidFakePlayer extends FakePlayer {
     public static class WrappedMaidInventory extends Inventory {
@@ -59,22 +48,54 @@ public class WrappedMaidFakePlayer extends FakePlayer {
         }
     }
 
-    private static ConcurrentHashMap<UUID, WrappedMaidFakePlayer> cache = new ConcurrentHashMap<>();
+    /**
+     * 缓存上限。FakePlayer 持有完整背包与能力对象，若女仆死亡/卸载后无人再次请求，
+     * 旧实现会永久保留该条目，长时间运行造成内存泄漏。此处额外做惰性清理与容量兜底。
+     */
+    private static final int MAX_CACHE_SIZE = 128;
+
+    private static final ConcurrentHashMap<UUID, WrappedMaidFakePlayer> cache = new ConcurrentHashMap<>();
     private final EntityMaid maid;
 
     public static WrappedMaidFakePlayer get(EntityMaid maid) {
-        if (cache.containsKey(maid.getUUID())) {
-            WrappedMaidFakePlayer wrappedMaidFakePlayer = cache.get(maid.getUUID());
-            if (!wrappedMaidFakePlayer.maid.isAlive()) {
-                cache.remove(maid.getUUID());
-            } else {
-                return wrappedMaidFakePlayer;
+        UUID id = maid.getUUID();
+        WrappedMaidFakePlayer cached = cache.get(id);
+        if (cached != null) {
+            if (cached.matches(maid)) {
+                return cached;
             }
+            cache.remove(id, cached);
+        }
+        if (cache.size() >= MAX_CACHE_SIZE) {
+            prune();
         }
         WrappedMaidFakePlayer fakePlayer = new WrappedMaidFakePlayer(maid);
-        cache.put(maid.getUUID(), fakePlayer);
+        cache.put(id, fakePlayer);
         return fakePlayer;
+    }
 
+    /**
+     * 女仆是否已失效（死亡、已移除、或实体实例已被重新加载替换）
+     */
+    private boolean matches(EntityMaid current) {
+        return maid == current && maid.isAlive() && !maid.isRemoved();
+    }
+
+    private static void prune() {
+        cache.values().removeIf(fakePlayer -> {
+            EntityMaid owner = fakePlayer.maid;
+            return owner == null || !owner.isAlive() || owner.isRemoved();
+        });
+        if (cache.size() >= MAX_CACHE_SIZE) {
+            cache.clear();
+        }
+    }
+
+    /**
+     * 女仆离开世界时调用，立即释放其 FakePlayer
+     */
+    public static void invalidate(EntityMaid maid) {
+        cache.remove(maid.getUUID());
     }
 
     private WrappedMaidFakePlayer(EntityMaid maid) {
