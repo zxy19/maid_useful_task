@@ -49,9 +49,10 @@ public interface IMaidBlockDestroyTask {
     default List<BlockPos> getTryDestroyBlockListBesidesStart(BlockPos startPos, BlockPos standPos, EntityMaid maid) {
         Set<BlockPos> marked = new HashSet<>();
         Queue<BlockPos> queue = new LinkedList<>();
-        List<BlockPos> result = new ArrayList<>();
+        // 每个可达方块都会把整条视线路径加入结果，相邻方块的路径大量重叠，
+        // 用保序集合去重，避免女仆对同一方块重复发起破坏尝试
+        Set<BlockPos> result = new LinkedHashSet<>();
         final int[] dv = {0, 1, -1};
-        final int maxDXZ = 2;
         queue.add(startPos);
         marked.add(startPos);
         // C(9), O(N)
@@ -77,7 +78,7 @@ public interface IMaidBlockDestroyTask {
                 }
             }
         }
-        return result;
+        return new ArrayList<>(result);
     }
 
     /**
