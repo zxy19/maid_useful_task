@@ -1,5 +1,6 @@
 package studio.fantasyit.maid_useful_task.event;
 
+import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -11,12 +12,17 @@ import studio.fantasyit.maid_useful_task.vehicle.MaidVehicleManager;
 public class MaidTickEvent {
     @SubscribeEvent
     public static void onTick(com.github.tartaricacid.touhoulittlemaid.api.event.MaidTickEvent event) {
-        if (event.getMaid().level() instanceof ServerLevel sl)
-            if (event.getMaid().getTask() instanceof IMaidVehicleControlTask imvc && event.getMaid().getVehicle() != null) {
-                imvc.tick(sl, event.getMaid());
-                MaidVehicleManager.syncVehicleParameter(event.getMaid());
-            }else if(event.getMaid().getVehicle() != null){
-                MaidVehicleManager.stopControlling(event.getMaid());
-            }
+        EntityMaid maid = event.getMaid();
+        if (!(maid.level() instanceof ServerLevel sl)) return;
+        if (maid.getVehicle() == null) {
+            MaidVehicleManager.onMaidWithoutVehicle(maid);
+            return;
+        }
+        if (maid.getTask() instanceof IMaidVehicleControlTask imvc) {
+            imvc.tick(sl, maid);
+            MaidVehicleManager.syncVehicleParameter(maid);
+        } else {
+            MaidVehicleManager.stopControlling(maid);
+        }
     }
 }
