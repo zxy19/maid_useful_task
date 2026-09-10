@@ -5,12 +5,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import studio.fantasyit.maid_useful_task.Config;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MaidReviveGlobalData {
-    private static final HashMap<UUID, UUID> playerIsRescuingByMaid = new HashMap<>();
-    private static final HashMap<UUID, Boolean> playerHasStartBeingRescued = new HashMap<>();
+    private static final Map<UUID, UUID> playerIsRescuingByMaid = new ConcurrentHashMap<>();
+    private static final Map<UUID, Boolean> playerHasStartBeingRescued = new ConcurrentHashMap<>();
 
     public static UUID getRescuingMaid(UUID playerId) {
         return playerIsRescuingByMaid.get(playerId);
@@ -23,7 +24,8 @@ public class MaidReviveGlobalData {
 
     public static void clearRescuingMaid(UUID uuid) {
         playerIsRescuingByMaid.remove(uuid);
-        playerHasStartBeingRescued.put(uuid, false);
+        // 原实现写入 false 而非移除，条目会随登录过的玩家数无限增长
+        playerHasStartBeingRescued.remove(uuid);
     }
 
     public static boolean hasStartRescue(UUID uuid) {
