@@ -31,10 +31,27 @@ import studio.fantasyit.maid_useful_task.compat.CompatEntry;
 import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
     public static final ResourceLocation UID = new ResourceLocation(MaidUsefulTask.MODID, "locate");
+
+    /**
+     * 同一 tick 内 findTarget 会被多个行为（移动/等待）重复调用，
+     * 其中首次调用才会真正计算（含事件派发），后续复用结果。
+     * 使用 WeakHashMap，女仆被回收后条目自动消失，不会泄漏。
+     */
+    private static final Map<EntityMaid, TickCache> TICK_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
+
+    private record TickCache(long gameTime, @Nullable BlockPos target) {
+    }
+
+    public static void invalidateCache(EntityMaid maid) {
+        TICK_CACHE.remove(maid);
+    }
 
     @Override
     public ResourceLocation getUid() {
@@ -72,17 +89,33 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
 
     @Override
     public @Nullable BlockPos findTarget(ServerLevel level, EntityMaid maid) {
+        long now = level.getGameTime();
+        TickCache cached = TICK_CACHE.get(maid);
+        if (cached != null && cached.gameTime() == now) {
+            return cached.target();
+        }
+
+        BlockPos target = computeTarget(level, maid, now);
+        TICK_CACHE.put(maid, new TickCache(now, target));
+        return target;
+    }
+
+    private @Nullable BlockPos computeTarget(ServerLevel level, EntityMaid maid, long now) {
         BlockPos target = null;
         ItemStack itemStack = maid.getMainHandItem();
         ItemStack last = MemoryUtil.getLocateItem(maid);
-        if (!last.isEmpty() && !itemStack.isEmpty() && ItemStack.isSameItemSameTags(last, itemStack)) {
-            MemoryUtil.setLocateItem(maid, itemStack);
+        // 手持物品发生变化（含数量与 NBT 差异）时，旧的定位结果不再有效
+        boolean itemChanged = last.isEmpty() != itemStack.isEmpty()
+                || (!last.isEmpty() && !ItemStack.isSameItemSameTags(last, itemStack));
+        if (itemChanged) {
+            MemoryUtil.setLocateItem(maid, itemStack.copy());
             MemoryUtil.clearCommonBlockCache(maid);
         }
+
         ItemLocateEvent event = new ItemLocateEvent(itemStack, maid, MemoryUtil.getCommonBlockCache(maid));
         if (MinecraftForge.EVENT_BUS.post(event)) {
             target = event.getTarget();
-        } else if (maid.getMainHandItem().is(Items.ENDER_EYE)) {
+        } else if (itemStack.is(Items.ENDER_EYE)) {
             target = MemoryUtil.getCommonBlockCache(maid);
             if (target == null) {
                 BlockPos blockpos = level.findNearestMapStructure(StructureTags.EYE_OF_ENDER_LOCATED, maid.blockPosition(), 100, false);
@@ -91,7 +124,7 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
                     target = blockpos;
                 }
             }
-        } else if (maid.getMainHandItem().is(Items.COMPASS)) {
+        } else if (itemStack.is(Items.COMPASS)) {
             target = MemoryUtil.getCommonBlockCache(maid);
             if (target == null) {
                 GlobalPos globalPos;
@@ -105,7 +138,7 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
                     target = globalPos.pos();
                 }
             }
-        } else if (maid.getMainHandItem().is(ItemTags.BEDS)) {
+        } else if (itemStack.is(ItemTags.BEDS)) {
             target = MemoryUtil.getCommonBlockCache(maid);
             if (target == null) {
                 LivingEntity owner = maid.getOwner();
@@ -119,12 +152,14 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
                             }
                         }
                     }
-                    if (target == null) {
+                    if (target != null) {
                         MemoryUtil.setCommonBlockCache(maid, target);
+                    } else {
+                        MemoryUtil.clearCommonBlockCache(maid);
                     }
                 }
             }
-        } else if (maid.getMainHandItem().is(Items.FILLED_MAP)) {
+        } else if (itemStack.is(Items.FILLED_MAP)) {
             target = MemoryUtil.getCommonBlockCache(maid);
             if (target == null) {
                 MapItemSavedData savedData = MapItem.getSavedData(itemStack, maid.level());
@@ -135,9 +170,7 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
                     savedData.getBanners()
                             .stream()
                             .findFirst()
-                            .ifPresent(t -> {
-                                tmpTarget.set(t.getPos().immutable());
-                            });
+                            .ifPresent(t -> tmpTarget.set(t.getPos().immutable()));
                     tag.getList("Decorations", Tag.TAG_COMPOUND)
                             .stream()
                             .filter(t -> ((CompoundTag) t).getByte("type") == 26)
@@ -148,13 +181,12 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
                                 tmpTarget.setZ(decoration.getInt("z"));
                             });
 
-
                     target = tmpTarget.immutable();
                     MemoryUtil.setCommonBlockCache(maid, target);
                 }
             }
         } else {
-            target = CompatEntry.getLocateTarget(maid, maid.getMainHandItem());
+            target = CompatEntry.getLocateTarget(maid, itemStack);
             if (target != null) {
                 MemoryUtil.setCommonBlockCache(maid, target);
                 return target;
@@ -167,6 +199,6 @@ public class MaidLocateTask implements IMaidTask, IMaidFindTargetTask {
     @Override
     public void clearCache(EntityMaid maid) {
         MemoryUtil.clearCommonBlockCache(maid);
+        invalidateCache(maid);
     }
 }
-
