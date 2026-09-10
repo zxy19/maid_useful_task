@@ -7,7 +7,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
-import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 import studio.fantasyit.maid_useful_task.task.IMaidFindTargetTask;
 import studio.fantasyit.maid_useful_task.util.Conditions;

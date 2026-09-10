@@ -3,12 +3,8 @@ package studio.fantasyit.maid_useful_task.network;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
-import studio.fantasyit.maid_useful_task.util.MemoryUtil;
-import studio.fantasyit.maid_useful_task.vehicle.MaidVehicleControlType;
 import studio.fantasyit.maid_useful_task.vehicle.MaidVehicleManager;
 
 import java.util.function.Supplier;

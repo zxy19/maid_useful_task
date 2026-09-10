@@ -10,7 +10,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import studio.fantasyit.maid_useful_task.memory.CurrentWork;
 import studio.fantasyit.maid_useful_task.task.MaidTreeTask;
 import studio.fantasyit.maid_useful_task.util.Conditions;
-import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
 @Mixin(MaidRunOne.class)
 abstract public class MaidRunOneMixin {

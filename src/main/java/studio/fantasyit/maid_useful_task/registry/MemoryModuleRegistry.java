@@ -9,11 +9,9 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.memory.*;
-import studio.fantasyit.maid_useful_task.util.WrappedMaidFakePlayer;
 import studio.fantasyit.maid_useful_task.vehicle.MaidVehicleControlType;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class MemoryModuleRegistry {
     public static final DeferredRegister<MemoryModuleType<?>> REGISTER

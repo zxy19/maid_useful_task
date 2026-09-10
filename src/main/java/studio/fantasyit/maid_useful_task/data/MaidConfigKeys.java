@@ -3,7 +3,6 @@ package studio.fantasyit.maid_useful_task.data;
 import com.github.tartaricacid.touhoulittlemaid.api.entity.data.TaskDataKey;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import net.minecraft.resources.ResourceLocation;
-import oshi.util.tuples.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
