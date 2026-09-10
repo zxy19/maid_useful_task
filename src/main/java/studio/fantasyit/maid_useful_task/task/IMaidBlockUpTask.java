@@ -16,6 +16,14 @@ import studio.fantasyit.maid_useful_task.util.PosUtils;
 import java.util.function.Function;
 
 public interface IMaidBlockUpTask {
+    /**
+     * 寻找落点时在竖直方向最多扫描的格数。
+     * 原实现以世界最低/最高建筑高度为唯一上界，从女仆所在高度一路扫到基岩或世界顶，
+     * 每个候选列最多数百次 getBlockState，再乘以 scanRange 的平方个候选列，
+     * 是上搭任务最重的一段开销。这里改为以女仆所在高度为中心的有界搜索。
+     */
+    int MAX_GROUND_SCAN = 48;
+
     default boolean isFindingBlock(EntityMaid maid, BlockPos target, BlockPos standPos) {
         if (target.distSqr(standPos) > touchLimit() * touchLimit())
             return false;
@@ -27,10 +35,14 @@ public interface IMaidBlockUpTask {
     }
 
     default boolean stillValid(EntityMaid maid, BlockPos startPos) {
-        for (int dx = 0; dx < touchLimit(); dx = dx <= 0 ? 1 - dx : -dx) {
-            for (int dz = 0; dz < touchLimit(); dz = dz <= 0 ? 1 - dz : -dz) {
+        int touchLimit = touchLimit();
+        int touchLimitSq = touchLimit * touchLimit;
+        for (int dx = 0; dx < touchLimit; dx = dx <= 0 ? 1 - dx : -dx) {
+            for (int dz = 0; dz < touchLimit; dz = dz <= 0 ? 1 - dz : -dz) {
                 for (int dy = 0; dy < verticalDistance(); dy++) {
                     BlockPos targetPos = startPos.offset(dx, dy, dz);
+                    // 先做廉价的半径过滤，避免对触不可及的位置调用（可能触发整树遍历的）isFindingBlock
+                    if (targetPos.distSqr(startPos) > touchLimitSq) continue;
                     if (isFindingBlock(maid, targetPos, startPos)) {
                         return true;
                     }
@@ -60,10 +72,20 @@ public interface IMaidBlockUpTask {
             for (int dz = 0; dz < scanRange; dz = dz <= 0 ? 1 - dz : -dz) {
                 //计算地面的位置
                 BlockPos.MutableBlockPos ground = center.offset(dx, 0, dz).mutable();
-                while (level.getBlockState(ground).canBeReplaced() && ground.getY() > level.getMinBuildHeight()) ground.move(0, -1, 0);
-                if(ground.getY() <= level.getMinBuildHeight()) continue;
-                while (!level.getBlockState(ground).canBeReplaced() && ground.getY() < level.getMaxBuildHeight()) ground.move(0, 1, 0);
-                if(ground.getY() >= level.getMaxBuildHeight()) continue;
+                int downStep = 0;
+                while (level.getBlockState(ground).canBeReplaced()
+                        && ground.getY() > level.getMinBuildHeight()
+                        && downStep++ < MAX_GROUND_SCAN) {
+                    ground.move(0, -1, 0);
+                }
+                if (ground.getY() <= level.getMinBuildHeight() || downStep > MAX_GROUND_SCAN) continue;
+                int upStep = 0;
+                while (!level.getBlockState(ground).canBeReplaced()
+                        && ground.getY() < level.getMaxBuildHeight()
+                        && upStep++ < MAX_GROUND_SCAN) {
+                    ground.move(0, 1, 0);
+                }
+                if (ground.getY() >= level.getMaxBuildHeight() || upStep > MAX_GROUND_SCAN) continue;
                 if (notAvailable.isVis(ground)) continue;
                 //地面基本判断
                 if (!PosUtils.isSafePos(level, ground)) continue;
