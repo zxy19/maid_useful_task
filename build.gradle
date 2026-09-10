@@ -16,20 +16,24 @@ plugins {
     id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
 
+// 未配置令牌时不应让配置阶段直接失败：本地构建与 CI 编译通常没有发布凭据
+def curseforgeToken = System.getenv("CURSEFORGE_TOKEN") ?: (project.findProperty("CURSEFORGE_TOKEN") ?: "")
+def modrinthToken = System.getenv("MODRINTH_TOKEN") ?: (project.findProperty("MODRINTH_TOKEN") ?: "")
+
 publishMods {
     type = BETA
     file = jar.archiveFile
     modLoaders.add("forge")
-    changelog = file("changelog").text
+    changelog = file("changelog").exists() ? file("changelog").text : ""
 
     curseforge {
         projectId = "1255424"
-        accessToken = CURSEFORGE_TOKEN
+        accessToken = curseforgeToken
         minecraftVersions.add("1.20.1")
     }
     modrinth {
         projectId = "J8yr3TFW"
-        accessToken = MODRINTH_TOKEN
+        accessToken = modrinthToken
         minecraftVersions.add("1.20.1")
     }
 }
@@ -184,10 +188,17 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-//    compileOnly fg.deobf("curse.maven:touhou-little-maid-355044:6911704")
-//    runtimeOnly fg.deobf("curse.maven:touhou-little-maid-355044:6911704")
-    compileOnly fg.deobf("libs:touhoulittlemaid-${minecraft_version}:all")
-    runtimeOnly fg.deobf("libs:touhoulittlemaid-${minecraft_version}:all")
+    // 女仆模组本体：优先使用开发者放到 libs/ 下的本地 jar；
+    // 全新克隆（没有 libs 目录，例如 CI）时回退到 CurseMaven 上的公开版本，
+    // 不再因为缺少本地 jar 而编译失败。
+    def localTlm = fileTree('libs').matching { include "touhoulittlemaid-*.jar" }.files
+    if (!localTlm.isEmpty()) {
+        compileOnly fg.deobf("libs:touhoulittlemaid-${minecraft_version}:all")
+        runtimeOnly fg.deobf("libs:touhoulittlemaid-${minecraft_version}:all")
+    } else {
+        compileOnly fg.deobf("curse.maven:touhou-little-maid-355044:6911704")
+        runtimeOnly fg.deobf("curse.maven:touhou-little-maid-355044:6911704")
+    }
     compileOnly fg.deobf("curse.maven:playerrevive-266890:6048921")
     compileOnly fg.deobf("curse.maven:creativecore-257814:6383884")
     compileOnly fg.deobf("curse.maven:natures-compass-252848:4712189")
