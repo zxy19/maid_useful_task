@@ -18,7 +18,6 @@ import studio.fantasyit.maid_useful_task.Config;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.behavior.PlayerReviveBehavior;
 import studio.fantasyit.maid_useful_task.compat.PlayerRevive;
-import studio.fantasyit.maid_useful_task.menu.MaidLoggingConfigGui;
 import studio.fantasyit.maid_useful_task.menu.MaidReviveConfigGui;
 
 import java.util.ArrayList;

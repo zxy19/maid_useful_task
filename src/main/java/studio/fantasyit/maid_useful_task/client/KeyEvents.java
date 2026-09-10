@@ -11,7 +11,6 @@ import net.minecraftforge.fml.common.Mod;
 import studio.fantasyit.maid_useful_task.MaidUsefulTask;
 import studio.fantasyit.maid_useful_task.network.MaidAllowHandleVehicle;
 import studio.fantasyit.maid_useful_task.network.Network;
-import studio.fantasyit.maid_useful_task.util.MemoryUtil;
 
 import static studio.fantasyit.maid_useful_task.client.KeyMapping.KEY_SWITCH_VEHICLE_CONTROL;
 

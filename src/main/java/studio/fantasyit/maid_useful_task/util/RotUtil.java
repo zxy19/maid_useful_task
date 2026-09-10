@@ -1,11 +1,8 @@
 package studio.fantasyit.maid_useful_task.util;
 
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import org.spongepowered.asm.mixin.Unique;
 
-import java.util.function.Supplier;
 
 public class RotUtil {
     public static float getXRot(Vec3 from, Vec3 to) {

@@ -5,7 +5,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 
 import java.util.List;
-import java.util.Set;
 
 public class BlockTargetMemory {
     public static final Codec<BlockTargetMemory> CODEC = RecordCodecBuilder.create(instance ->
